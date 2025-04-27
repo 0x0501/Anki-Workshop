@@ -36,3 +36,13 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+
+
+## API
+
+- `/deck`: List all the available decks on Anki workshop.
+- `/deck?category=[category]`: List decks that meet the criteria.
+- `/deck?search=[keywords]`: List decks that meed the search keywords.
+- `/deck/inspect/[identifier]`: Inspect an specific deck.
+- `/login`: Login in Anki workshop.
+- `/register`: Register a new Anki workshop account.
