@@ -1,7 +1,6 @@
 <script lang="ts">
 	import DeckGallery, { type DeckItem } from '$lib/components/DeckGallery.svelte';
-	import { Button, Gallery, ImagePlaceholder, Search } from 'flowbite-svelte';
-	import type { MouseEventHandler } from 'svelte/elements';
+	import { Button, Search } from 'flowbite-svelte';
 
 	const images: DeckItem[] = [
 		{
@@ -124,26 +123,63 @@
 </script>
 
 <div class="flex items-center justify-center py-4 md:py-8 flex-wrap gap-3 mb-3 mx-auto">
-	<Button pill size="md" value="all" onclick={categoryChanged}>全部</Button>
-	<Button pill size="md" color="alternative" value="postgraduate" onclick={categoryChanged}
-		>考研</Button
-	>
-	<Button pill size="md" color="alternative" value="civilServiceExam" onclick={categoryChanged}
-		>考公</Button
-	>
-	<Button pill size="md" color="alternative" value="obtainCert" onclick={categoryChanged}
-		>考证</Button
-	>
-	<Button pill size="md" color="alternative" value="english" onclick={categoryChanged}>英语</Button>
-	<Button pill size="md" color="alternative" value="middleSchool" onclick={categoryChanged}
-		>初中</Button
-	>
-	<Button pill size="md" color="alternative" value="highSchool" onclick={categoryChanged}
-		>高中</Button
-	>
+	<!-- filter buttons -->
+	<div class="flex flex-row flex-wrap justify-center gap-3">
+		<Button pill size="md" value="all" onclick={categoryChanged} class="text-xs py-2 md:text-sm"
+			>全部</Button
+		>
+		<Button
+			pill
+			size="md"
+			color="alternative"
+			value="postgraduate"
+			onclick={categoryChanged}
+			class="text-xs py-2 md:text-sm">考研</Button
+		>
+		<Button
+			pill
+			size="md"
+			color="alternative"
+			value="civilServiceExam"
+			onclick={categoryChanged}
+			class="text-xs py-2 md:text-sm">考公</Button
+		>
+		<Button
+			pill
+			size="md"
+			color="alternative"
+			value="obtainCert"
+			onclick={categoryChanged}
+			class="text-xs py-2 md:text-sm">考证</Button
+		>
+		<Button
+			pill
+			size="md"
+			color="alternative"
+			value="english"
+			onclick={categoryChanged}
+			class="text-xs py-2 md:text-sm">英语</Button
+		>
+		<Button
+			pill
+			size="md"
+			color="alternative"
+			value="middleSchool"
+			onclick={categoryChanged}
+			class="text-xs py-2 md:text-sm">初中</Button
+		>
+		<Button
+			pill
+			size="md"
+			color="alternative"
+			value="highSchool"
+			onclick={categoryChanged}
+			class="text-xs py-2 md:text-sm">高中</Button
+		>
+	</div>
 	<form class="flex gap-3">
-		<Search size="md" class="w-sm" />
-		<Button class="p-2.5! me-1">搜索</Button>
+		<Search size="md" class="items-center min-w-xs " />
+		<Button class="hidden sm:block p-2.5! me-1 sm:w-25">搜索</Button>
 	</form>
 </div>
 <div class="pl-4 pr-4">
