@@ -2,19 +2,8 @@
 	import { page } from '$app/state';
 	import { deckNavState } from '$lib/deckNavState.svelte';
 	import { formatDateFromTimestamp } from '$lib/utils/helper';
-	import {
-		Badge,
-		Button,
-		Heading,
-		Hr,
-		Li,
-		List,
-		Tooltip
-	} from 'flowbite-svelte';
-	import {
-		BadgeCheckSolid,
-		CheckOutline
-	} from 'flowbite-svelte-icons';
+	import { Badge, Button, Heading, Hr, Li, List, Tooltip } from 'flowbite-svelte';
+	import { BadgeCheckSolid, CheckOutline } from 'flowbite-svelte-icons';
 
 	// maximum 8 badges
 	const testBadges = ['英语', '考研', '学习', '公共课', '词汇', 'CET-4', 'CET-6', '考神'];
@@ -76,8 +65,9 @@
 
 	// update navbar
 
-	deckNavState.deckTitle = deckTitle
-	deckNavState.deckLikeByPeople = deckLikeByPeople
+	deckNavState.deckTitle = deckTitle;
+	deckNavState.deckLikeByPeople = deckLikeByPeople;
+	deckNavState.isDeckLikeByCurrentUser = false;
 </script>
 
 <div class="flex flex-col">
