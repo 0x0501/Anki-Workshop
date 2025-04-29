@@ -15,10 +15,6 @@
 			>
 		</NavBrand>
 		<NavHamburger />
-		<!-- Login/Register button group -->
-		<!-- <div class="hidden md:flex md:order-2 gap-3.5">
-
-			</div> -->
 
 		<NavUl
 			{activeUrl}
