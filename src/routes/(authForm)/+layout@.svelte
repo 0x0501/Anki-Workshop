@@ -1,6 +1,9 @@
-<script>
+<script lang="ts">
 	import HomeNavigation from '$lib/components/HomeNavigation.svelte';
+
+	let { children } = $props();
 </script>
 
-<!-- nav bar -->
 <HomeNavigation />
+
+{@render children()}

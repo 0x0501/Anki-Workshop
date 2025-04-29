@@ -55,7 +55,7 @@
 		}}
 		novalidate
 	>
-		<div class="grid gap-3 mb-6 w-xs md:w-sm">
+		<div class="grid gap-3 mb-6 w-xs md:w-sm mt-10">
 			<Heading tag="h4" class="text-center">找回密码</Heading>
 			<div class="flex gap-2 flex-col">
 				<Label for="username">邮箱</Label>

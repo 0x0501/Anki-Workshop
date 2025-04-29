@@ -1,0 +1,46 @@
+<script lang="ts">
+	import { page } from '$app/state';
+	import { Navbar, NavBrand, NavHamburger, NavLi, NavUl } from 'flowbite-svelte';
+
+	let activeUrl = $derived(page.url.pathname);
+</script>
+
+<div class="relative px-8 md:py-2 mt-16 md:mt-14">
+	<Navbar navContainerClass="w-full m-0" class="fixed w-full z-20 top-0 start-0 border-b">
+		<!-- Anki workshop logo -->
+		<NavBrand href="/">
+			<img src="/favicon.png" class="me-3 h-6 sm:h-9" alt="Anki workshop logo" />
+			<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
+				>Anki Workshop</span
+			>
+		</NavBrand>
+		<NavHamburger />
+		<!-- Login/Register button group -->
+		<!-- <div class="hidden md:flex md:order-2 gap-3.5">
+
+			</div> -->
+
+		<NavUl
+			{activeUrl}
+			ulClass="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 py-2 px-2 md:py-2 mt-4 md:mt-0"
+		>
+			<NavLi class="text-sm md:text-base" href="/decks">卡组</NavLi>
+			<!-- <NavLi href="/bench">工作台</NavLi> -->
+			<NavLi class="text-sm md:text-base" href="/tutorial">模板制作</NavLi>
+			<NavLi class="text-sm md:text-base" href="/common-faq">常见问题</NavLi>
+			<NavLi class="text-sm md:text-base" href="/contact">联系</NavLi>
+			<NavLi class="text-sm md:text-base" href="/about">关于</NavLi>
+			<div class="flex gap-3 flex-col md:flex-row">
+				<a
+					class="text-center font-medium focus-within:ring-4 focus-within:outline-hidden items-center justify-center px-4 py-2 text-sm text-white bg-primary-700 hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700 focus-within:ring-primary-300 dark:focus-within:ring-primary-800 rounded-lg"
+					href="/register">注册</a
+				>
+				<a
+					class="text-center font-medium focus-within:ring-4 focus-within:outline-hidden items-center justify-center px-4 py-2 text-sm text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 focus-within:ring-gray-200 dark:focus-within:ring-gray-700 rounded-lg inline-flex"
+					color="light"
+					href="/login">登录</a
+				>
+			</div>
+		</NavUl>
+	</Navbar>
+</div>
