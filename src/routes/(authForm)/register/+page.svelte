@@ -143,7 +143,7 @@
 			// isSubmitting
 		}}
 	>
-		<div class="grid gap-3 mb-6">
+		<div class="grid gap-3 mb-6 w-xs md:w-sm">
 			<Heading tag="h4" class="text-center">注册</Heading>
 			<div class="flex gap-2 flex-col">
 				<Label for="username">用户名</Label>
