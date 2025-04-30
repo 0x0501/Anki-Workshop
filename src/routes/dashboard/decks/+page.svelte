@@ -7,8 +7,10 @@
 		Breadcrumb,
 		BreadcrumbItem,
 		Button,
+		Checkbox,
 		Heading,
 		Pagination,
+		Search,
 		TabItem,
 		Table,
 		TableBody,
@@ -76,28 +78,31 @@
 		supportPlatform: supportPlatformOption;
 	}
 
-	const deckData: DeckItem[] = (() => {
-		const dataArray: DeckItem[] = [];
-		let i = 0;
-		while (i <= 1000) {
-			dataArray.push({
-				deckName: '测试卡组',
-				deckId: i,
-				deckDescription:
-					'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget magna a turpis lobortis ullamcorper vitae sit amet est. Vivamus posuere sagittis condimentum. Pellentesque nunc nisi, elementum ut quam vel, vehicula scelerisque lorem. Sed urna tellus, venenatis non lectus et, tempor scelerisque magna. Maecenas non enim facilisis, efficitur ligula non, malesuada sapien. Suspendisse non mauris venenatis lorem maximus eleifend. Sed pretium risus quam, non efficitur nibh ullamcorper sed. Donec diam libero, finibus id massa a, cursus pulvinar orci. Maecenas mauris metus, mollis quis euismod vel, mattis a sapien. Phasellus eget velit in lectus blandit luctus. Fusce nisi elit, tempor vitae sapien a, posuere placerat metus.',
-				deckTags: ['英语', '考研'],
-				deckSize: Math.round(Math.random() * 1000),
-				deckCount: 20,
-				deckPrice: 39.98,
-				LastUpdateDate: 1745923720,
-				CreatedDate: 1745923720,
-				isDeckOnSale: true,
-				supportPlatform: { platform: 'All' }
-			});
-			i++;
-		}
-		return dataArray;
-	})();
+	const deckData: DeckItem[] = $state(
+		(() => {
+			const dataArray: DeckItem[] = [];
+			let i = 0;
+			while (i <= 1000) {
+				dataArray.push({
+					deckName: '测试卡组',
+					deckId: i,
+					deckDescription:
+						'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eget magna a turpis lobortis ullamcorper vitae sit amet est. Vivamus posuere sagittis condimentum. Pellentesque nunc nisi, elementum ut quam vel, vehicula scelerisque lorem. Sed urna tellus, venenatis non lectus et, tempor scelerisque magna. Maecenas non enim facilisis, efficitur ligula non, malesuada sapien. Suspendisse non mauris venenatis lorem maximus eleifend. Sed pretium risus quam, non efficitur nibh ullamcorper sed. Donec diam libero, finibus id massa a, cursus pulvinar orci. Maecenas mauris metus, mollis quis euismod vel, mattis a sapien. Phasellus eget velit in lectus blandit luctus. Fusce nisi elit, tempor vitae sapien a, posuere placerat metus.',
+					deckTags: ['英语', '考研'],
+					deckSize: Math.round(Math.random() * 1000),
+					deckCount: 20,
+					deckPrice: 39.98,
+					LastUpdateDate: 1745923720,
+					CreatedDate: 1745923720,
+					isDeckOnSale: true,
+					supportPlatform: { platform: 'All' }
+				});
+				i++;
+			}
+			return dataArray;
+		})()
+	);
+
 	deckData.push({
 		deckName: '判断题',
 		deckId: 1001,
@@ -112,12 +117,82 @@
 		isDeckOnSale: false,
 		supportPlatform: { platform: 'All' }
 	});
+
+	let currentSelectedDeckId = $state<number[]>([]);
+
+	let isEditible = $derived(currentSelectedDeckId.length === 1 ? true : false);
+
+	let isDeletable = $derived(currentSelectedDeckId.length >= 1 ? true : false);
+
+	let filterInputValue = $state<string>('');
+
+	let filterData: DeckItem[] = $derived.by(() => {
+		if (!filterInputValue) {
+			return deckData;
+		} else {
+			return deckData.filter(
+				(item) =>
+					item.deckName.includes(filterInputValue) ||
+					item.deckDescription.includes(filterInputValue)
+			);
+		}
+	});
+
+	const handleItemChecked = (event: Event) => {
+		const checkbox = event.target as HTMLInputElement;
+		const deckId = parseInt(checkbox.value, 10);
+
+		if (checkbox.checked) {
+			if (!currentSelectedDeckId.includes(deckId)) {
+				currentSelectedDeckId = [...currentSelectedDeckId, deckId];
+			}
+		} else {
+			currentSelectedDeckId = currentSelectedDeckId.filter((id) => id !== deckId);
+		}
+	};
+
+	const handleTableFilter = (event: Event) => {
+		event.preventDefault();
+		let input = event.target as HTMLInputElement;
+
+		console.log(input.value);
+	};
 </script>
 
 <div class="flex flex-col">
 	<Heading tag="h4" class="mb-2">所有卡组</Heading>
-	<Table items={deckData} hoverable={true} striped={true} placeholder="搜索Deck名称">
-		<TableHead class="text-center">
+
+	<div class="flex mb-3 pr-3 justify-between py-2 items-center">
+		<form class="inline-flex gap-2 items-center">
+			<Search
+				size="md"
+				class="w-sm"
+				bind:value={filterInputValue}
+				placeholder="搜索卡组名称"
+				oninput={handleTableFilter}
+			></Search>
+			<!-- TODO: implemnet search feature -->
+			<Button size="sm">搜索</Button>
+		</form>
+		<div>
+			<Button size="sm">新增</Button>
+			<Button size="sm" color="blue" disabled={!isEditible}>编辑</Button>
+			<Button size="sm" color="red" disabled={!isDeletable}>删除</Button>
+		</div>
+	</div>
+	<Table
+		divClass="relative overflow-x-auto overflow-y-auto h-150"
+		items={filterData}
+		hoverable={true}
+		striped={true}
+	>
+		<TableHead
+			class="text-center"
+			theadClass="text-xs uppercase sticky top-0 bg-gray-100 dark:bg-gray-800 z-10"
+		>
+			<TableHeadCell class="p-4!">
+				<Checkbox />
+			</TableHeadCell>
 			<TableHeadCell>ID</TableHeadCell>
 			<TableHeadCell>名称</TableHeadCell>
 			<TableHeadCell>价格 (￥)</TableHeadCell>
@@ -130,9 +205,12 @@
 			<TableHeadCell>操作</TableHeadCell>
 		</TableHead>
 		<TableBody>
-			{#each deckData.slice(0, 10) as item}
+			{#each filterData.slice(0, 500) as item}
 				<TableBodyRow slot="row" class="text-center">
 					<!-- TODO: truncate text when it too long. -->
+					<TableHeadCell class="p-4!">
+						<Checkbox oninput={handleItemChecked} value={item.deckId} />
+					</TableHeadCell>
 					<TableBodyCell>{item.deckId}</TableBodyCell>
 					<TableBodyCell>{item.deckName}</TableBodyCell>
 					<TableBodyCell>{item.deckPrice}</TableBodyCell>
@@ -152,7 +230,7 @@
 		</TableBody>
 	</Table>
 	<!-- Pagination -->
-	<div class="flex flex-row justify-center mt-2">
+	<!-- <div class="flex flex-row justify-center mt-2">
 		<ul class="inline-flex gap-3 items-center">
 			<li class="bg-gray-100 rounded px-2 py-1 cursor-pointer">上一页</li>
 			<li>1</li>
@@ -160,5 +238,5 @@
 			<li>3</li>
 			<li class="bg-gray-100 rounded px-2 py-1 cursor-pointer">下一页</li>
 		</ul>
-	</div>
+	</div> -->
 </div>
