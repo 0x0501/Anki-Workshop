@@ -32,7 +32,7 @@
 		<a
 			class="flex flex-col justify-center align-middle gap-3"
 			class:hidden={!isVisible}
-			href={`${page.url.pathname}/inspect/${deck.identifier}`}
+			href={`${page.url.pathname}decks/inspect/${deck.identifier}`}
 		>
 			<img class="h-auto max-w-full rounded-lg" src={deck.src} alt={deck.alt} />
 			<p class="font-normal text-gray-700 leading-tight">{deck.alt}</p>

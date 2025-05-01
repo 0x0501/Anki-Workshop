@@ -74,27 +74,27 @@
 	>
 		<SidebarWrapper>
 			<SidebarGroup>
-				<SidebarItem label="数据面板" href='/dashboard/overall'>
+				<SidebarItem label="网站设置" href='/dashboard'>
 					<svelte:fragment slot="icon">
 						<ChartPieSolid
 							class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
 						/>
 					</svelte:fragment>
 				</SidebarItem>
-				<SidebarItem label="主页设置">
+				<!-- <SidebarItem label="主页设置">
 					<svelte:fragment slot="icon">
 						<UserCircleSolid
 							class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
 						/>
 					</svelte:fragment>
-				</SidebarItem>
-				<SidebarItem label="我的贴子">
+				</SidebarItem> -->
+				<!-- <SidebarItem label="我的贴子">
 					<svelte:fragment slot="icon">
 						<NewspaperSolid
 							class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
 						/>
 					</svelte:fragment>
-				</SidebarItem>
+				</SidebarItem> -->
 				<SidebarItem label="卡组管理" href='/dashboard/decks'>
 					<svelte:fragment slot="icon">
 						<ObjectsColumnSolid

@@ -39,9 +39,17 @@
 
 <!-- navigation only render for `/decks/inspect` and `/decks/preview`-->
 {#if page.route.id?.startsWith('/decks/inspect/') || page.route.id?.startsWith('/decks/preview/')}
-	<div class="flex items-center gap-3 justify-between pr-4 md:pr-6 py-3 divide-gray-200 dark:divide-gray-700 border-gray-200 dark:border-gray-700 border-b">
+	<div
+		class="flex items-center gap-3 justify-between pr-4 md:pr-6 py-3 divide-gray-200 dark:divide-gray-700 border-gray-200 dark:border-gray-700 border-b"
+	>
 		<!-- back to decks -->
-		<a class="border-0 px-4" href="/decks" type="button"><AngleLeftOutline /></a>
+		<a
+			class="border-0 px-4"
+			href={page.url.pathname.includes('preview')
+				? page.url.pathname.replace('preview', 'inspect')
+				: '/'}
+			type="button"><AngleLeftOutline /></a
+		>
 		<!-- deck title -->
 		<p class="hidden md:block flex-grow text-left">{deckNavState.deckTitle}</p>
 		<div class="inline-flex gap-3">

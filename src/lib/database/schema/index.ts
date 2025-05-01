@@ -3,7 +3,7 @@ import { sql } from 'drizzle-orm';
 import type { supportPlatformOption } from '$lib/interfaces/supportPlatformOption';
 
 enum UserRole {
-	Root = 1, 
+	Root = 1,
 	Admin = 2,
 	User = 3
 }
@@ -57,3 +57,17 @@ export const decks = sqliteTable(
 	},
 	(table) => [index('deck_name_idx').on(table.deck_name)]
 );
+
+export const workshop_settings = sqliteTable('workshop_setting', {
+	id: int('id').primaryKey({ autoIncrement: true }),
+	allow_user_register: int('allow_user_register', { mode: 'boolean' }).notNull().default(true),
+	enable_showing_follower: int('enable_showing_follower', { mode: 'boolean' })
+		.notNull()
+		.default(true),
+	enable_user_follow_func: int('enable_user_follow_func', { mode: 'boolean' })
+		.notNull()
+		.default(true),
+	enable_user_favorite_func: int('enable_user_favorite_func', { mode: 'boolean' })
+		.notNull()
+		.default(true)
+});
