@@ -178,7 +178,7 @@
 			<Button size="sm" onclick={handleTableFilter}>搜索</Button>
 		</form>
 		<div>
-			<Button size="sm">新增</Button>
+			<Button size="sm" href="/dashboard/decks/new">新增</Button>
 			<Button size="sm" color="blue" disabled={!isEditible}>编辑</Button>
 			<Button size="sm" color="red" disabled={!isDeletable}>删除</Button>
 		</div>

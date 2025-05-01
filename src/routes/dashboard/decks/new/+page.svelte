@@ -2,4 +2,4 @@
 	import DeckEditor from '$lib/components/DeckEditor.svelte';
 </script>
 
-<DeckEditor editorType="Edit" />
+<DeckEditor editorType="Create" />
