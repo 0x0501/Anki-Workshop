@@ -4,6 +4,7 @@
 
 	import {
 		A,
+		Badge,
 		Breadcrumb,
 		BreadcrumbItem,
 		Button,
@@ -126,17 +127,7 @@
 
 	let filterInputValue = $state<string>('');
 
-	let filterData: DeckItem[] = $derived.by(() => {
-		if (!filterInputValue) {
-			return deckData;
-		} else {
-			return deckData.filter(
-				(item) =>
-					item.deckName.includes(filterInputValue) ||
-					item.deckDescription.includes(filterInputValue)
-			);
-		}
-	});
+	let displayedDeckData: DeckItem[] = $derived(deckData);
 
 	const handleItemChecked = (event: Event) => {
 		const checkbox = event.target as HTMLInputElement;
@@ -153,9 +144,21 @@
 
 	const handleTableFilter = (event: Event) => {
 		event.preventDefault();
-		let input = event.target as HTMLInputElement;
+		// Filter the original deckData based on the current input value
+		const filtered = deckData.filter(
+			(item) =>
+				item.deckName.includes(filterInputValue) || item.deckDescription.includes(filterInputValue)
+		);
+		// Update the state variable that controls the table's data source
+		displayedDeckData = filtered;
+	};
 
-		console.log(input.value);
+	const handleTableInput = (event: Event) => {
+		const input = event.target as HTMLInputElement;
+
+		if (input.value.length === 0) {
+			displayedDeckData = deckData;
+		}
 	};
 </script>
 
@@ -169,10 +172,10 @@
 				class="w-sm"
 				bind:value={filterInputValue}
 				placeholder="搜索卡组名称"
-				oninput={handleTableFilter}
+				oninput={handleTableInput}
 			></Search>
 			<!-- TODO: implemnet search feature -->
-			<Button size="sm">搜索</Button>
+			<Button size="sm" onclick={handleTableFilter}>搜索</Button>
 		</form>
 		<div>
 			<Button size="sm">新增</Button>
@@ -182,7 +185,7 @@
 	</div>
 	<Table
 		divClass="relative overflow-x-auto overflow-y-auto h-150"
-		items={filterData}
+		items={displayedDeckData}
 		hoverable={true}
 		striped={true}
 	>
@@ -205,19 +208,29 @@
 			<TableHeadCell>操作</TableHeadCell>
 		</TableHead>
 		<TableBody>
-			{#each filterData.slice(0, 500) as item}
+			{#each displayedDeckData.slice(0, 200) as item}
 				<TableBodyRow slot="row" class="text-center">
 					<!-- TODO: truncate text when it too long. -->
 					<TableHeadCell class="p-4!">
 						<Checkbox oninput={handleItemChecked} value={item.deckId} />
 					</TableHeadCell>
 					<TableBodyCell>{item.deckId}</TableBodyCell>
-					<TableBodyCell>{item.deckName}</TableBodyCell>
+					<TableBodyCell
+						>{item.deckName.length > 10
+							? item.deckName.substring(0, 10) + '...'
+							: item.deckName}</TableBodyCell
+					>
 					<TableBodyCell>{item.deckPrice}</TableBodyCell>
 					<TableBodyCell>{(item.deckSize / 1024).toFixed(2)}MB</TableBodyCell>
 					<TableBodyCell>{item.deckCount}</TableBodyCell>
 					<TableBodyCell>{item.supportPlatform.platform}</TableBodyCell>
-					<TableBodyCell>{item.isDeckOnSale ? '已上架' : '已下架'}</TableBodyCell>
+					<TableBodyCell>
+						{#if item.isDeckOnSale}
+							<Badge color='green'>已上架</Badge>
+						{:else}
+							<Badge color='pink'>已下架</Badge>
+						{/if}
+					</TableBodyCell>
 					<TableBodyCell>{formatDateFromTimestamp(item.LastUpdateDate)}</TableBodyCell>
 					<TableBodyCell>{formatDateFromTimestamp(item.CreatedDate)}</TableBodyCell>
 					<TableBodyCell class="inline-flex flex-row gap-2">
@@ -229,14 +242,4 @@
 			{/each}
 		</TableBody>
 	</Table>
-	<!-- Pagination -->
-	<!-- <div class="flex flex-row justify-center mt-2">
-		<ul class="inline-flex gap-3 items-center">
-			<li class="bg-gray-100 rounded px-2 py-1 cursor-pointer">上一页</li>
-			<li>1</li>
-			<li>2</li>
-			<li>3</li>
-			<li class="bg-gray-100 rounded px-2 py-1 cursor-pointer">下一页</li>
-		</ul>
-	</div> -->
 </div>
