@@ -67,7 +67,8 @@ export const workshop_settings = sqliteTable('workshop_setting', {
 	enable_user_follow_func: int('enable_user_follow_func', { mode: 'boolean' })
 		.notNull()
 		.default(true),
-	enable_user_favorite_func: int('enable_user_favorite_func', { mode: 'boolean' })
+	enable_deck_favorite_func: int('enable_user_favorite_func', { mode: 'boolean' })
 		.notNull()
 		.default(true)
+	
 });
