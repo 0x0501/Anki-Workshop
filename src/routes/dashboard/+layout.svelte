@@ -1,10 +1,5 @@
 <script>
 	import {
-		Navbar,
-		NavBrand,
-		NavHamburger,
-		NavUl,
-		NavLi,
 		Avatar,
 		Dropdown,
 		DropdownItem,
@@ -18,20 +13,11 @@
 	import { library } from '@fortawesome/fontawesome-svg-core';
 	import { faArrowRightFromBracket, faGear, faBell } from '@fortawesome/free-solid-svg-icons';
 	import { FontAwesomeIcon } from 'fontawesome-svelte';
-	import {
-		ArrowRightToBracketOutline,
-		BellSolid,
-		ChartPieSolid,
-		CogOutline,
-		NewspaperSolid,
-		ObjectsColumnSolid,
-		UserCircleSolid
-	} from 'flowbite-svelte-icons';
+	import { ChartPieSolid, ObjectsColumnSolid } from 'flowbite-svelte-icons';
 	import { page } from '$app/state';
+	import { signOut } from '@auth/sveltekit/client';
 
 	library.add(faArrowRightFromBracket, faGear, faBell);
-
-	const userNickname = $state('Jack');
 
 	let activeUrl = $derived(page.url.pathname);
 
@@ -51,7 +37,9 @@
 		<div class="inline-flex cursor-pointer items-center gap-3" id="userAvatar">
 			<Avatar size="sm" />
 			<!-- user's nickname -->
-			<span class="block text-sm text-gray-900 dark:text-white">{userNickname}</span>
+			<span class="block text-sm text-gray-900 dark:text-white"
+				>{page.data.session?.user?.name}</span
+			>
 		</div>
 
 		<Dropdown triggeredBy="#userAvatar">
@@ -59,7 +47,11 @@
 				<FontAwesomeIcon icon={faGear} />
 				账号设置
 			</DropdownItem>
-			<DropdownItem slot="footer" class="inline-flex gap-2 items-center justify-between">
+			<DropdownItem
+				slot="footer"
+				class="inline-flex gap-2 items-center justify-between"
+				onclick={() => signOut({ redirect: true, redirectTo: '/' })}
+			>
 				<FontAwesomeIcon icon={faArrowRightFromBracket} />
 				退出账号
 			</DropdownItem>
@@ -74,7 +66,7 @@
 	>
 		<SidebarWrapper>
 			<SidebarGroup>
-				<SidebarItem label="网站设置" href='/dashboard'>
+				<SidebarItem label="网站设置" href="/dashboard">
 					<svelte:fragment slot="icon">
 						<ChartPieSolid
 							class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -95,20 +87,20 @@
 						/>
 					</svelte:fragment>
 				</SidebarItem> -->
-				<SidebarItem label="卡组管理" href='/dashboard/decks'>
+				<SidebarItem label="卡组管理" href="/dashboard/decks">
 					<svelte:fragment slot="icon">
 						<ObjectsColumnSolid
 							class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
 						/>
 					</svelte:fragment>
 				</SidebarItem>
-				<SidebarItem label="退出账号">
+				<!-- <SidebarItem label="退出账号">
 					<svelte:fragment slot="icon">
 						<ArrowRightToBracketOutline
 							class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
 						/>
 					</svelte:fragment>
-				</SidebarItem>
+				</SidebarItem> -->
 			</SidebarGroup>
 		</SidebarWrapper>
 	</Sidebar>

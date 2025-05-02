@@ -1,17 +1,23 @@
-import { int, real, sqliteTable, text, index } from 'drizzle-orm/sqlite-core';
+import { int, real, sqliteTable, text, index, primaryKey } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 import type { supportPlatformOption } from '$lib/interfaces/supportPlatformOption';
+import type { AdapterAccount } from '@auth/sveltekit/adapters';
 
-enum UserRole {
+export enum UserRole {
 	Root = 1,
 	Admin = 2,
 	User = 3
 }
 
 export const users = sqliteTable('users', {
-	id: int('id').primaryKey({ autoIncrement: true }),
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()), // Changed to TEXT for Auth.js compatibility
 	email: text('email').unique().notNull(),
 	username: text('username').unique().notNull(),
+	name: text('name'), // Added for Auth.js
+	emailVerified: int('emailVerified', { mode: 'timestamp_ms' }), // Added for Auth.js
+	image: text('image'), // Added for Auth.js
 	hashed_password: text('hashed_password').notNull(),
 	created_at: text('created_at')
 		.notNull()
@@ -70,5 +76,42 @@ export const workshop_settings = sqliteTable('workshop_setting', {
 	enable_deck_favorite_func: int('enable_user_favorite_func', { mode: 'boolean' })
 		.notNull()
 		.default(true)
-	
 });
+
+export const accounts = sqliteTable(
+	'account',
+	{
+		userId: text('userId')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		type: text('type').$type<AdapterAccount['type']>().notNull(),
+		provider: text('provider').notNull(),
+		providerAccountId: text('providerAccountId').notNull(),
+		refresh_token: text('refresh_token'),
+		access_token: text('access_token'),
+		expires_at: int('expires_at'),
+		token_type: text('token_type'),
+		scope: text('scope'),
+		id_token: text('id_token'),
+		session_state: text('session_state')
+	},
+	(table) => [primaryKey({ columns: [table.provider, table.providerAccountId] })]
+);
+
+export const sessions = sqliteTable('session', {
+	sessionToken: text('sessionToken').notNull().primaryKey(),
+	userId: text('userId')
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' }),
+	expires: int('expires', { mode: 'timestamp_ms' }).notNull()
+});
+
+export const verificationTokens = sqliteTable(
+	'verificationToken',
+	{
+		identifier: text('identifier').notNull(),
+		token: text('token').notNull().unique(), // Unique constraint is important
+		expires: int('expires', { mode: 'timestamp_ms' }).notNull()
+	},
+	(table) => [primaryKey({ columns: [table.identifier, table.token] })]
+);
