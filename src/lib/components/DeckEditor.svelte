@@ -16,6 +16,9 @@
 		type SelectOptionType
 	} from 'flowbite-svelte';
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
+	import { RESTfulApiBase } from '$lib/api';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 
 	let selectedPlatform = $state([]);
 	let supportPlatformList: SelectOptionType<string>[] = [
@@ -37,14 +40,19 @@
 	interface DeckEditorProps {
 		editorType: 'Create' | 'Edit';
 	}
-
 	let props: DeckEditorProps = $props();
+
+	console.log(page.data);
 
 	let deckCoverImageUrl = $state('');
 
 	let deckFile = $state('');
 
 	let deckDescription = $state('');
+
+	let deckName = $state('');
+	let deckPrice = $state(0);
+	let deckCount = $state(0);
 
 	// State to hold multiple images for snapshots
 	let deckSnapshots = $state<{ id: number; dataUrl: string; isCropped: boolean }[]>([]);
@@ -161,7 +169,52 @@
 		imageCropModalStatus = true;
 	};
 
-	const handleEditSuccess = (event: Event) => {
+	const handleCreateNewDeck = async (event: Event) => {
+		// Prevent default form submission if this function is called by a form submit event
+		event.preventDefault();
+
+		const deckData = {
+			deck_name: deckName,
+			deck_author_id: page.data.session?.user.id,
+			deck_description: deckDescription,
+			deck_card_count: Number(deckCount), // Ensure it's a number
+			deck_price: Number(deckPrice), // Ensure it's a number
+			is_deck_on_sale: true, // Default to false
+			support_platform: JSON.stringify(selectedPlatform), // Serialize array
+			deck_cover_image_url: deckCoverImageUrl,
+			deck_tags: JSON.stringify(selectedTags) // Serialize array
+		};
+
+		console.log('Client payload:');
+		console.log(deckData);
+
+		try {
+			const response = await fetch(`${RESTfulApiBase}/decks`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(deckData)
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log('Deck created successfully:', result);
+				// TODO: handle when success, e.g., navigate to deck list page
+				// show a notification
+				goto('/dashboard/decks', { invalidateAll: true});
+			} else {
+				console.error('Failed to create deck:', result);
+				// TODO: handle error, e.g., show error message to user
+			}
+		} catch (error) {
+			console.error('Error during deck creation:', error);
+			// TODO: handle network error
+		}
+	};
+
+	const handleEditDeck = (event: Event) => {
 		// TODO: handle when success
 	};
 
@@ -185,7 +238,11 @@
 			</BreadcrumbItem>
 		</Breadcrumb>
 		<div>
-			<Button size="sm" disabled={!allImagesCropped} onclick={handleEditSuccess}>
+			<Button
+				size="sm"
+				disabled={!allImagesCropped}
+				onclick={props.editorType === 'Create' ? handleCreateNewDeck : handleEditDeck}
+			>
 				{props.editorType === 'Create' ? '添加' : '完成编辑'}
 			</Button>
 			<Button size="sm" color="alternative" href="/dashboard/decks">取消编辑</Button>
@@ -244,15 +301,15 @@
 			<div class="flex flex-col col-span-6 row-span-4">
 				<div class="col-span-2">
 					<Label for="deckName" class="mt-2 mb-2">卡组名称</Label>
-					<Input type="text" id="deckName" required />
+					<Input type="text" id="deckName" required bind:value={deckName} />
 				</div>
 				<div class="col-span-2">
 					<Label for="deckPrice" class="mt-2 mb-2">价格(￥)</Label>
-					<Input type="number" id="deckPrice" required />
+					<Input type="number" id="deckPrice" required bind:value={deckPrice} />
 				</div>
 				<div class="col-span-2">
 					<Label for="deckCount" class="mt-2 mb-2">卡片数量</Label>
-					<Input type="number" id="deckCount" required />
+					<Input type="number" id="deckCount" required bind:value={deckCount} />
 				</div>
 				<div class="col-span-2">
 					<Label for="deckSupportPlatform" class="mt-2 mb-2">支持平台</Label>
