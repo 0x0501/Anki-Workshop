@@ -185,9 +185,6 @@
 			deck_tags: JSON.stringify(selectedTags) // Serialize array
 		};
 
-		console.log('Client payload:');
-		console.log(deckData);
-
 		try {
 			const response = await fetch(`${RESTfulApiBase}/decks`, {
 				method: 'POST',

@@ -11,7 +11,7 @@ const verifyDeleteSchema = z.object({
 /**
  * @description Delete one deck or many decks, as DELETE method don't support body params, use POST instead
  */
-export const DELETE: RequestHandler = async ({ locals, request }) => {
+export const POST: RequestHandler = async ({ locals, request }) => {
 	// verify user input
 	const data = await request.json();
 	const result = verifyDeleteSchema.safeParse(data);

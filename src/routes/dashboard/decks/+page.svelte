@@ -23,6 +23,8 @@
 	import type { PageProps } from './$types';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { RESTfulApiBase } from '$lib/api';
+	import { goto, invalidateAll } from '$app/navigation';
 
 	/**
 	 * @description Description of a deck, used for sale on the home page.
@@ -113,7 +115,8 @@
 		// Filter the original deckData based on the current input value
 		const filtered = deckData.filter(
 			(item) =>
-				item.deck_name.includes(filterInputValue) || item.deck_description.includes(filterInputValue)
+				item.deck_name.includes(filterInputValue) ||
+				item.deck_description.includes(filterInputValue)
 		);
 		// Update the state variable that controls the table's data source
 		displayedDeckData = filtered;
@@ -127,9 +130,40 @@
 		}
 	};
 
-	const handleDeckDelete = async (event : Event) => {
-		
-	}
+	const handleDeckDelete = async (event: Event) => {
+		event.preventDefault();
+
+		const payload = {
+			ids: currentSelectedDeckId
+		};
+
+		try {
+			const response = await fetch(`${RESTfulApiBase}/decks/delete`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(payload)
+			});
+
+			const result = await response.json();
+
+			// TODO: fix deck id auto increment issue, when a deck is deleted, the id should automatically update
+			// when deck id 1 is removed, deck id 2 should be id 1
+			if (response.ok) {
+				// refresh data by invoke `load` function
+				// TODO: fix the bug, when deck deleted, the page should refresh
+				await invalidateAll();
+
+				console.log('Deck delete successfully:', result);
+			} else {
+				console.error('Failed to delete deck:', result);
+				// TODO: handle error, e.g., show error message to user
+			}
+		} catch (error) {
+			console.error('Error during deck creation:', error);
+		}
+	};
 </script>
 
 <div class="flex flex-col">
