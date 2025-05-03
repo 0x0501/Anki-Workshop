@@ -17,5 +17,27 @@ declare global {
 		}
 	}
 }
+import { DefaultSession } from '@auth/sveltekit'; // Import necessary types
+
+declare module '@auth/sveltekit' {
+	interface User {
+		id: string;
+		role?: import('$lib/database/schema').UserRole;
+	}
+
+	interface Session {
+		user: {
+			id: string;
+			role: import('$lib/database/schema').UserRole;
+		} & DefaultSession['user'];
+		anything: number;
+	}
+
+	interface JWT {
+		id: string;
+		role: import('$lib/database/schema').UserRole;
+		anything: number;
+	}
+}
 
 export {};

@@ -1,7 +1,7 @@
 // Auth.js configuration
 
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
-import { CredentialsSignin, SvelteKitAuth, type SvelteKitAuthConfig } from '@auth/sveltekit';
+import { CredentialsSignin, SvelteKitAuth, type SvelteKitAuthConfig, type User } from '@auth/sveltekit';
 import { initializeDrizzle } from '$lib/database/server';
 import * as schema from '$lib/database/schema';
 import type { Handle } from '@sveltejs/kit';
@@ -61,13 +61,16 @@ export function createAuthJsConfig(DB: D1Database): SvelteKitAuthConfig {
 					console.log('Credentials authorized for:', username);
 					// 3. Return user object (without password!)
 					// Auth.js expects id, name, email, image
+					// The code below return the value to JWT (jwt callback)
+					// and the return value of jwt callback goes into session callback
+					// Path: adapter --> jwt --> session
 					return {
 						id: user.id,
 						name: user.username,
 						email: user.email,
 						image: user.image,
 						role : user.role
-					};
+					} as User; // Explicitly cast to the augmented User type
 				}
 			})
 		],
@@ -79,11 +82,11 @@ export function createAuthJsConfig(DB: D1Database): SvelteKitAuthConfig {
 		},
 		callbacks: {
 			// Optional: Modify session object or JWT token
-			async session({ session, user }) {
+			async session({ session, token }) {
 				// Add user ID and custom fields (like username) to the session object
-				if (session.user && user) {
-					session.user.id = user.id;
-
+				if (session.user && token) {
+					session.user.id = token.id as string;
+					session.user.role = token.role as schema.UserRole;
 					// Query the full user object if needed to get username
 					// const fullUser = await drizzleClient.query.users.findFirst({...});
 					// if (fullUser) session.user.username = fullUser.username;
@@ -94,8 +97,8 @@ export function createAuthJsConfig(DB: D1Database): SvelteKitAuthConfig {
 				if (user) {
 					// User is available on sign-in
 					token.id = user.id;
+					token.role = user.role
 					// Add other custom claims
-					token.anything = 1;
 					// token.username = user.username;
 				}
 				return token;

@@ -1,15 +1,14 @@
-// detect whether the current user has permission for dashboard
-// 在我的项目代码中，我只是在@/src/app.d.ts 中声明了locals.db，但是我没有在任何地方自己实力化这个对象，但是为什么db可以正常使用
-
 import type { PageServerLoad } from './$types';
-import { workshop_settings } from '$lib/database/schema';
-import { eq, type InferSelectModel } from 'drizzle-orm';
+import { UserRole, users, workshop_settings } from '$lib/database/schema';
+import { and, eq, type InferSelectModel } from 'drizzle-orm';
+import { redirect } from '@sveltejs/kit';
 
 type WorkshopSettings = InferSelectModel<typeof workshop_settings>;
 
 export const load: PageServerLoad = async (
 	event
 ): Promise<{ system_settings: WorkshopSettings }> => {
+
 	const settings = await event.locals.db.query.workshop_settings.findFirst({
 		where: eq(workshop_settings.id, 2)
 	});

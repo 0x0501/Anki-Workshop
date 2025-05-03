@@ -4,12 +4,15 @@
 	import { onMount } from 'svelte';
 	import type { ActionResult, SubmitFunction } from '@sveltejs/kit';
 
-	let { data } = $props();
+	let { data, }  = $props();
 
 	let allowUserRegister = $state(data.system_settings.allow_user_register);
 	let enableShowingFollower = $state(data.system_settings.enable_showing_follower);
 	let enableUserFollowFunc = $state(data.system_settings.enable_user_follow_func);
 	let enableDeckFavoriteFunc = $state(data.system_settings.enable_deck_favorite_func);
+
+	
+	console.log(data.session)
 
 	// Function to handle toggle change and submit the form
 	const handleToggleChange = (event: Event) => {

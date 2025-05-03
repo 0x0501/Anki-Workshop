@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { UserRole } from '$lib/database/schema';
 	import { signOut } from '@auth/sveltekit/client';
 	import { Button, Navbar, NavBrand, NavHamburger, NavLi, NavUl } from 'flowbite-svelte';
 	import { CogOutline } from 'flowbite-svelte-icons';
@@ -31,14 +32,18 @@
 			<div class="flex gap-3 flex-col md:flex-row items-center">
 				{#if session}
 					<span>{session.user?.name}</span>
-					<a
-						class="text-center font-medium focus-within:ring-4 focus-within:outline-hidden items-center justify-center px-4 py-2 text-sm text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 focus-within:ring-gray-200 dark:focus-within:ring-gray-700 rounded-lg inline-flex gap-1"
-						color="light"
-						href="/dashboard"
-					>
-						<CogOutline />
-						管理后台</a
-					>
+					{#if session.user.role === UserRole.Root}
+						<a
+							class="text-center font-medium focus-within:ring-4 focus-within:outline-hidden items-center justify-center px-4 py-2 text-sm text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 focus-within:ring-gray-200 dark:focus-within:ring-gray-700 rounded-lg inline-flex gap-1"
+							color="light"
+							href="/dashboard"
+						>
+							<CogOutline />
+							管理后台</a
+						>
+					{:else}
+						<Button color="alternative" size="sm" onclick={() => signOut()}>退出登录</Button>
+					{/if}
 				{:else}
 					<a
 						class="text-center font-medium focus-within:ring-4 focus-within:outline-hidden items-center justify-center px-4 py-2 text-sm text-white bg-primary-700 hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700 focus-within:ring-primary-300 dark:focus-within:ring-primary-800 rounded-lg"
