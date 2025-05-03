@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { A, Button, Checkbox, Heading, Helper, Input, Label, Li, List } from 'flowbite-svelte';
 	import { EyeOutline, EyeSlashOutline, CloseOutline, CheckOutline } from 'flowbite-svelte-icons';
-	import type { SvelteHTMLElements } from 'svelte/elements';
+	import { onMount } from 'svelte';
+	// import type { SvelteHTMLElements } from 'svelte/elements';
 
 	// interface AuthFormProps extends Partial<SvelteHTMLElements['form']> {
 	// 	authType: 'Login' | 'Register';
@@ -70,6 +73,14 @@
 	// let PasswordValidationClassArray = $derived(
 	// 	PasswordValidationArray.map((v) => (v ? 'text-green-600' : 'text-red-600'))
 	// );
+
+	// Redirect if already logged in
+	onMount(() => {
+		if (page.data.session) {
+			console.log(page.data.session);
+			goto('/'); // Or dashboard
+		}
+	});
 
 	const getValidationColorScheme = (status: boolean) => {
 		return status ? 'text-green-600' : 'text-red-600';

@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { A, Button, Checkbox, Heading, Helper, Input, Label, Li, List } from 'flowbite-svelte';
-	import { EyeOutline, EyeSlashOutline, CloseOutline, CheckOutline } from 'flowbite-svelte-icons';
-	import type { SvelteHTMLElements } from 'svelte/elements';
-	import { signIn } from '@auth/sveltekit/client';
-	import { onMount } from 'svelte';
-	import { goto, invalidate, invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { signIn } from '@auth/sveltekit/client';
+	import { A, Button, Checkbox, Heading, Helper, Input, Label } from 'flowbite-svelte';
+	import { EyeOutline, EyeSlashOutline } from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
 	/**
 	 * @description The username, used for login
 	 */
@@ -26,8 +25,6 @@
 	 * @description Submitting error from server
 	 */
 	let formError = $state('');
-
-	let userAgreementAndTerm = $state(true);
 
 	/**
 	 * @description Remember login status, within 7days no password will be required.
@@ -99,9 +96,9 @@
 				console.error('Sign in error:', result.error);
 				// Map common errors to user-friendly messages
 				if (result.error === 'CredentialsSignin') {
-					formError = 'Invalid username or password.';
+					formError = '用户名或密码不正确';
 				} else {
-					formError = 'Login failed. Please try again.';
+					formError = '登录失败，请稍后重试';
 				}
 			} else if (result?.ok) {
 				// Sign-in successful, redirect manually
