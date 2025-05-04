@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		});
 		const result = await response.json();
 		console.log(`${RESTfulApiBase}/decks 请求成功`);
-		console.log(result);
+		// console.log(result);
 
 		// transmit response data to pages
 

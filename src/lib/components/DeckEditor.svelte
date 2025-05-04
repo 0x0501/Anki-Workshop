@@ -42,8 +42,6 @@
 	}
 	let props: DeckEditorProps = $props();
 
-	console.log(page.data);
-
 	let deckCoverImageUrl = $state('');
 
 	let deckFile = $state('');
@@ -200,7 +198,10 @@
 				console.log('Deck created successfully:', result);
 				// TODO: handle when success, e.g., navigate to deck list page
 				// show a notification
-				goto('/dashboard/decks', { invalidateAll: true});
+				setTimeout(() => {
+					goto('/dashboard/decks', { invalidateAll: true});
+				}, 500)
+
 			} else {
 				console.error('Failed to create deck:', result);
 				// TODO: handle error, e.g., show error message to user

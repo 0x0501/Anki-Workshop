@@ -41,9 +41,9 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 
 	if (!result.success) {
 		// print error to console
-		console.log(`POST api/v1/decks`)
-		console.log(result.error)
-		console.log(data)
+		// console.log(`POST api/v1/decks`)
+		// console.log(result.error)
+		// console.log(data)
 		return json({
 			status: 'error',
 			data: null,

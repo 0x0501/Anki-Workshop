@@ -25,7 +25,7 @@
 	import { onMount } from 'svelte';
 	import { RESTfulApiBase } from '$lib/api';
 	import { goto, invalidateAll } from '$app/navigation';
-
+	import { index } from 'drizzle-orm/singlestore-core';
 	/**
 	 * @description Description of a deck, used for sale on the home page.
 	 */
@@ -78,14 +78,13 @@
 		 */
 		deck_cover_image_url: string;
 
-		supportPlatform: supportPlatformOption;
+		support_platform: supportPlatformOption;
 	};
 
 	// Get data from +page.server.ts
 	const { data }: PageProps = $props();
-	console.log(data);
 
-	const deckData = $state(data.data as DeckItem[]);
+	let deckData = $state(data.data as DeckItem[]);
 
 	let currentSelectedDeckId = $state<number[]>([]);
 
@@ -148,12 +147,13 @@
 
 			const result = await response.json();
 
-			// TODO: fix deck id auto increment issue, when a deck is deleted, the id should automatically update
-			// when deck id 1 is removed, deck id 2 should be id 1
 			if (response.ok) {
-				// refresh data by invoke `load` function
-				// TODO: fix the bug, when deck deleted, the page should refresh
-				await invalidateAll();
+				// update deck data
+				setTimeout(() => {
+					invalidateAll().then(() => {
+						deckData = data.data as DeckItem[];
+					});
+				}, 500);
 
 				console.log('Deck delete successfully:', result);
 			} else {
@@ -178,7 +178,6 @@
 				placeholder="搜索卡组名称"
 				oninput={handleTableInput}
 			></Search>
-			<!-- TODO: implemnet search feature -->
 			<Button size="sm" onclick={handleTableFilter}>搜索</Button>
 		</form>
 		<div>
@@ -189,7 +188,7 @@
 	</div>
 	<Table
 		divClass="relative overflow-x-auto overflow-y-auto h-150"
-		items={displayedDeckData}
+		bind:items={displayedDeckData}
 		hoverable={true}
 		striped={true}
 	>
@@ -212,13 +211,13 @@
 			<TableHeadCell>操作</TableHeadCell>
 		</TableHead>
 		<TableBody>
-			{#each displayedDeckData.slice(0, 200) as item}
+			{#each displayedDeckData as item, index (item.id)}
 				<TableBodyRow slot="row" class="text-center">
 					<!-- TODO: truncate text when it too long. -->
 					<TableHeadCell class="p-4!">
 						<Checkbox oninput={handleItemChecked} value={item.id} />
 					</TableHeadCell>
-					<TableBodyCell>{item.id}</TableBodyCell>
+					<TableBodyCell>{index + 1}</TableBodyCell>
 					<TableBodyCell
 						>{item.deck_name.length > 10
 							? item.deck_name.substring(0, 10) + '...'
@@ -227,7 +226,9 @@
 					<TableBodyCell>{item.deck_price}</TableBodyCell>
 					<TableBodyCell>{(item.deck_size / 1024).toFixed(2)}MB</TableBodyCell>
 					<TableBodyCell>{item.deck_card_count}</TableBodyCell>
-					<TableBodyCell>{item.supportPlatform}</TableBodyCell>
+					<TableBodyCell
+						><Badge color="dark">{JSON.parse(item.support_platform)[0]}</Badge></TableBodyCell
+					>
 					<TableBodyCell>
 						{#if item.is_deck_on_sale}
 							<Badge color="green">已上架</Badge>
