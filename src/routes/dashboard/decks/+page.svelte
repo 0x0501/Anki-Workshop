@@ -84,6 +84,10 @@
 	// Get data from +page.server.ts
 	const { data }: PageProps = $props();
 
+	onMount(() => {
+		console.log(data)
+	})
+
 	let deckData = $state(data.data as DeckItem[]);
 
 	let currentSelectedDeckId = $state<number[]>([]);
@@ -161,7 +165,50 @@
 				// TODO: handle error, e.g., show error message to user
 			}
 		} catch (error) {
-			console.error('Error during deck creation:', error);
+			console.error('Error during deck deletion:', error);
+		}
+	};
+
+	/**
+	 * @description change deck status from `on sale` to `stock`
+	 */
+	const handleDeckStatusChange = async (event : Event) => {
+		event.preventDefault();
+
+		const deckId = (event.target as HTMLAnchorElement).dataset.value;
+
+		const deckStatus = (event.target as HTMLAnchorElement).dataset.status;
+		
+		const payload = {
+			is_deck_on_sale : deckStatus === 'false',
+			id : Number(deckId)
+		}
+
+		try{
+			const response = await fetch(`${RESTfulApiBase}/decks`, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(payload)
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+					// update deck data
+					setTimeout(() => {
+					invalidateAll().then(() => {
+						deckData = data.data as DeckItem[];
+					});
+				}, 500);
+				console.log('Deck change status successfully:', result);
+			}else {
+				console.error('Failed to change deck status:', result);
+				// TODO: handle error, e.g., show error message to user
+			}
+		}catch(error) {
+			console.error('Error during deck status changing:', error);
 		}
 	};
 </script>
@@ -241,7 +288,13 @@
 					<TableBodyCell class="inline-flex flex-row gap-2">
 						<A href={`/dashboard/decks/edit/${item.id}`}>编辑</A>
 						<A>更新</A>
-						<A>下架</A>
+						<A onclick={handleDeckStatusChange} data-value={item.id} data-status={item.is_deck_on_sale}>
+							{#if item.is_deck_on_sale}
+								下架
+							{:else}
+								上架
+							{/if}
+						</A>
 					</TableBodyCell>
 				</TableBodyRow>
 			{/each}

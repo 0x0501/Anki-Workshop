@@ -2,6 +2,7 @@ import { integer, real, sqliteTable, text, index, primaryKey } from 'drizzle-orm
 import { sql } from 'drizzle-orm';
 import type { AdapterAccount } from '@auth/sveltekit/adapters';
 import type { supportPlatformOption } from '$lib/interfaces/supportPlatformOption';
+import { formatDateFromTimestamp } from '$lib/utils/helper';
 
 export enum UserRole {
 	Root = 1,
@@ -21,11 +22,11 @@ export const users = sqliteTable('users', {
 	hashed_password: text('hashed_password').notNull(),
 	created_at: text('created_at')
 		.notNull()
-		.default(sql`(current_timestamp)`),
+		.$default(() => formatDateFromTimestamp(Date.now(), true)),
 	updated_at: text('updated_at')
 		.notNull()
-		.default(sql`(current_timestamp)`)
-		.$onUpdate(() => new Date().toString()),
+		.$default(() => formatDateFromTimestamp(Date.now(), true))
+		.$onUpdate(() => formatDateFromTimestamp(Date.now(), true)),
 	role: integer('role').$type<UserRole>().notNull().default(UserRole.User)
 });
 
@@ -44,11 +45,11 @@ export const decks = sqliteTable(
 		deck_price: real('deck_price'),
 		last_updated_date: text('last_updated_date')
 			.notNull()
-			.default(sql`(current_timestamp)`)
-			.$onUpdate(() => new Date().toString()),
+			.$default(() => formatDateFromTimestamp(Date.now(), true))
+			.$onUpdate(() => formatDateFromTimestamp(Date.now(), true)),
 		created_date: text('created_date')
 			.notNull()
-			.default(sql`(current_timestamp)`),
+			.$default(() => formatDateFromTimestamp(Date.now(), true)),
 		is_deck_on_sale: integer('is_deck_on_sale', { mode: 'boolean' }).default(false),
 		deck_liked_by_people: integer('deck_liked_by_people').default(0),
 		deck_cover_image_url: text('deck_cover_image_url'),
