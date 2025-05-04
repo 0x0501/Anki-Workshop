@@ -22,6 +22,7 @@
 					cropper = new window.Cropper(img, {
 						aspectRatio: 9 / 16,
 						viewMode: 1,
+
 						// @ts-ignore
 						crop(event) {
 							imageHeight = event.detail.height;
@@ -57,14 +58,19 @@
 
 	let props: ImageCropProps = $props();
 
-	export function getCroppedBlobUrl(): Promise<string | null> {
+	type CroppedImageData = {
+		blob: Blob | MediaSource;
+		imageBlobUrl: string;
+	};
+
+	export function getCroppedBlobUrl(): Promise<CroppedImageData | null> {
 		return new Promise((resolve) => {
 			if (!cropper) {
 				resolve(null);
 				return;
 			}
 
-			const canvas = cropper.getCroppedCanvas({
+			const canvas: HTMLCanvasElement = cropper.getCroppedCanvas({
 				width: imageWidth,
 				height: imageHeight
 			});
@@ -73,7 +79,10 @@
 				canvas.toBlob((blob: Blob | MediaSource | null) => {
 					if (blob) {
 						const imageUrl = URL.createObjectURL(blob);
-						resolve(imageUrl);
+						resolve({
+							blob: blob,
+							imageBlobUrl: imageUrl
+						});
 					} else {
 						resolve(null);
 					}

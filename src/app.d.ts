@@ -12,12 +12,15 @@ declare global {
 		// interface PageState {}
 		interface Platform {
 			env: {
-				DB: D1Database; // Changed D1 to DB to match wrangler.toml binding
+				DB: D1Database; // Changed D1 to DB to match wrangler.toml binding,
+				anki_workshop_images : R2Bucket // Cloudflare R2 bucket
+				R2_PUBLIC_LINK : string
 			};
 		}
 	}
 }
 import { DefaultSession } from '@auth/sveltekit'; // Import necessary types
+import type { R2Bucket } from "@cloudflare/workers-types";
 
 declare module '@auth/sveltekit' {
 	interface User {

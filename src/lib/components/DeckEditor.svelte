@@ -7,6 +7,7 @@
 		Dropzone,
 		Fileupload,
 		Heading,
+		Helper,
 		Hr,
 		Input,
 		Label,
@@ -16,9 +17,12 @@
 		type SelectOptionType
 	} from 'flowbite-svelte';
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
-	import { RESTfulApiBase } from '$lib/api';
+	import { RESTfulApiBase, type RESTfulApiResponse } from '$lib/api';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import { onDestroy } from 'svelte';
+	import { z } from 'zod';
 
 	let selectedPlatform = $state([]);
 	let supportPlatformList: SelectOptionType<string>[] = [
@@ -42,8 +46,6 @@
 	}
 	let props: DeckEditorProps = $props();
 
-	let deckCoverImageUrl = $state('');
-
 	let deckFile = $state('');
 
 	let deckDescription = $state('');
@@ -52,21 +54,47 @@
 	let deckPrice = $state(0);
 	let deckCount = $state(0);
 
+	let priceErrorMessage = $state('');
+	let deckCountErrorMessage = $state('');
+
+	// Form input validation
+
+	let priceVerifySchema = z.number().min(0.01, '价格最少为0.01');
+	let deckCountVerifySchema = z.number().min(1, '卡片数量最低为1张');
+
 	// State to hold multiple images for snapshots
-	let deckSnapshots = $state<{ id: number; dataUrl: string; isCropped: boolean }[]>([]);
+	type DeckSnapshot = {
+		id: number;
+		dataUrl: string;
+		blob: Blob | MediaSource;
+		isCropped: boolean;
+	};
+	let deckSnapshots = $state<DeckSnapshot[]>([]);
+
 	let nextImageId = 0; // Simple counter for unique IDs
+
+	let deckCoverImageUrl = $state('');
+
+	let deckCoverImageBlob = $derived.by<Blob | MediaSource>(() => {
+		if (deckSnapshots.length > 0) {
+			return deckSnapshots[0].blob;
+		} else {
+			return new Blob();
+		}
+	});
 
 	let imageCropModalStatus = $state(false);
 	let imageCropperInstance = $state<ImageCropper>(); // Declare variable for ImageCropper instance
 	let currentImageIndexToCrop = $state<number | null>(null); // Index of the image being cropped
 
 	const processFile = (file: File) => {
-		return new Promise<{ id: number; dataUrl: string; isCropped: boolean }>((resolve, reject) => {
+		return new Promise<DeckSnapshot>((resolve, reject) => {
 			if (file && file.type.startsWith('image/')) {
 				const reader = new FileReader();
 				reader.onload = (e) => {
 					resolve({
 						id: nextImageId++,
+						blob: new Blob(),
 						dataUrl: e.target?.result as string,
 						isCropped: false
 					});
@@ -81,9 +109,11 @@
 
 	const confirmCrop = async () => {
 		if (imageCropperInstance && currentImageIndexToCrop !== null) {
-			const blobUrl = await imageCropperInstance.getCroppedBlobUrl();
-			if (blobUrl) {
-				deckSnapshots[currentImageIndexToCrop].dataUrl = blobUrl;
+			const croppedData = await imageCropperInstance.getCroppedBlobUrl();
+
+			if (croppedData) {
+				deckSnapshots[currentImageIndexToCrop].dataUrl = croppedData.imageBlobUrl;
+				deckSnapshots[currentImageIndexToCrop].blob = croppedData.blob;
 				deckSnapshots[currentImageIndexToCrop].isCropped = true;
 				// Trigger state update for the array
 				deckSnapshots = [...deckSnapshots];
@@ -91,6 +121,7 @@
 		}
 		imageCropModalStatus = false;
 		currentImageIndexToCrop = null;
+
 	};
 
 	const dropHandle = async (event: DragEvent) => {
@@ -122,6 +153,7 @@
 					if (deckSnapshots.length === 0) {
 						// First image is potential cover
 						deckCoverImageUrl = imageData.dataUrl;
+						deckCoverImageBlob = imageData.blob;
 					}
 					deckSnapshots = [...deckSnapshots, imageData];
 				} catch (error) {
@@ -149,6 +181,7 @@
 						if (deckSnapshots.length === 0) {
 							// First image is potential cover
 							deckCoverImageUrl = imageData.dataUrl;
+							deckCoverImageBlob = imageData.blob;
 						}
 						deckSnapshots = [...deckSnapshots, imageData];
 					} catch (error) {
@@ -167,51 +200,6 @@
 		imageCropModalStatus = true;
 	};
 
-	const handleCreateNewDeck = async (event: Event) => {
-		// Prevent default form submission if this function is called by a form submit event
-		event.preventDefault();
-
-		const deckData = {
-			deck_name: deckName,
-			deck_author_id: page.data.session?.user.id,
-			deck_description: deckDescription,
-			deck_card_count: Number(deckCount), // Ensure it's a number
-			deck_price: Number(deckPrice), // Ensure it's a number
-			is_deck_on_sale: true, // Default to false
-			support_platform: JSON.stringify(selectedPlatform), // Serialize array
-			deck_cover_image_url: deckCoverImageUrl,
-			deck_tags: JSON.stringify(selectedTags) // Serialize array
-		};
-
-		try {
-			const response = await fetch(`${RESTfulApiBase}/decks`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(deckData)
-			});
-
-			const result = await response.json();
-
-			if (response.ok) {
-				console.log('Deck created successfully:', result);
-				// TODO: handle when success, e.g., navigate to deck list page
-				// show a notification
-				setTimeout(() => {
-					goto('/dashboard/decks', { invalidateAll: true});
-				}, 500)
-
-			} else {
-				console.error('Failed to create deck:', result);
-				// TODO: handle error, e.g., show error message to user
-			}
-		} catch (error) {
-			console.error('Error during deck creation:', error);
-			// TODO: handle network error
-		}
-	};
-
 	const handleEditDeck = (event: Event) => {
 		// TODO: handle when success
 	};
@@ -220,33 +208,128 @@
 	const allImagesCropped = $derived.by(() => {
 		return deckSnapshots.length > 0 && deckSnapshots.every((img) => img.isCropped);
 	});
+
+	// free memory and Blob URL
+	onDestroy(() => {});
 </script>
 
 <div>
 	<Heading tag="h4" class="">
 		{props.editorType === 'Create' ? '新建卡组' : '编辑卡组'}
 	</Heading>
+	<form
+		method="POST"
+		action={`${RESTfulApiBase}/decks`}
+		use:enhance={async ({ action, formData, formElement, controller, submitter, cancel }) => {
+			// Prevent default form submission
+			cancel();
 
-	<div class="flex w-full justify-between">
-		<!-- edit button -->
-		<Breadcrumb aria-label="Default breadcrumb example">
-			<BreadcrumbItem href="/dashboard/decks" home>卡组管理</BreadcrumbItem>
-			<BreadcrumbItem href="#">
-				{props.editorType === 'Create' ? '新建' : '编辑'}
-			</BreadcrumbItem>
-		</Breadcrumb>
-		<div>
-			<Button
-				size="sm"
-				disabled={!allImagesCropped}
-				onclick={props.editorType === 'Create' ? handleCreateNewDeck : handleEditDeck}
-			>
-				{props.editorType === 'Create' ? '添加' : '完成编辑'}
-			</Button>
-			<Button size="sm" color="alternative" href="/dashboard/decks">取消编辑</Button>
+			// Input validation
+			// 1. Price validation
+			let priceVerifyResult = priceVerifySchema.safeParse(deckPrice, {});
+
+			if (!priceVerifyResult.success) {
+				priceErrorMessage = priceVerifyResult.error.issues[0].message;
+				return;
+			} else {
+				priceErrorMessage = '';
+			}
+
+			// 2. Card count validation
+			let deckCountVerifyResult = deckCountVerifySchema.safeParse(deckCount);
+
+			if (!deckCountVerifyResult.success) {
+				deckCountErrorMessage = deckCountVerifyResult.error.issues[0].message;
+				return;
+			} else {
+				deckCountErrorMessage = '';
+			}
+
+			let finalCoverImageUrl = '';
+
+			// 1. Upload image to cloudflare r2 (or local equivalent) if it's a data URL
+			if (deckCoverImageBlob) {
+				try {
+					const formData = new FormData();
+					formData.append('deckCoverImageBlob', deckCoverImageBlob as Blob, 'deckCoverImageBlob');
+					const uploadResponse = await fetch('/api/v1/decks/upload-image', {
+						method: 'POST',
+						body: formData
+					});
+
+					const uploadResult: RESTfulApiResponse = await uploadResponse.json();
+
+					if (uploadResponse.ok && !uploadResult.error) {
+						finalCoverImageUrl = uploadResult.data as string;
+						console.log('Image uploaded successfully:', finalCoverImageUrl);
+					} else {
+						console.error('Failed to upload image:', uploadResult);
+						// TODO: Handle upload error - maybe show a user notification
+						return; // Stop the process if image upload fails
+					}
+				} catch (error) {
+					console.error('Error during image upload:', error);
+					// TODO: Handle network error during upload
+					return; // Stop the process if image upload fails
+				}
+			}
+
+			// 2. Compose POST request body with the final image URL and send it to API End point
+			const deckData = {
+				deck_name: deckName,
+				deck_author_id: page.data.session?.user.id, // Use get(page) to access store value
+				deck_description: deckDescription,
+				deck_card_count: Number(deckCount), // Ensure it's a number
+				deck_price: Number(deckPrice), // Ensure it's a number
+				is_deck_on_sale: true, // Default to true as per original logic
+				support_platform: JSON.stringify(selectedPlatform), // Serialized array
+				deck_cover_image_url: finalCoverImageUrl, // Use the URL from R2 or original if not uploaded
+				deck_tags: JSON.stringify(selectedTags) // Serialized array
+			};
+
+			try {
+				const response = await fetch(`${RESTfulApiBase}/decks`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(deckData)
+				});
+
+				const result = await response.json();
+
+				if (response.ok) {
+					console.log('Deck created successfully:', result);
+					// TODO: handle when success, e.g., navigate to deck list page
+					// show a notification
+					setTimeout(() => {
+						goto('/dashboard/decks', { invalidateAll: true });
+					}, 500);
+				} else {
+					console.error('Failed to create deck:', result);
+					// TODO: handle error, e.g., show error message to user
+				}
+			} catch (error) {
+				console.error('Error during deck creation:', error);
+				// TODO: handle network error
+			}
+		}}
+	>
+		<div class="flex w-full justify-between">
+			<!-- edit button -->
+			<Breadcrumb aria-label="Default breadcrumb example">
+				<BreadcrumbItem href="/dashboard/decks" home>卡组管理</BreadcrumbItem>
+				<BreadcrumbItem href="#">
+					{props.editorType === 'Create' ? '新建' : '编辑'}
+				</BreadcrumbItem>
+			</Breadcrumb>
+			<div>
+				<Button size="sm" type="submit" disabled={!allImagesCropped}>
+					{props.editorType === 'Create' ? '添加' : '完成编辑'}
+				</Button>
+				<Button size="sm" color="alternative" href="/dashboard/decks">取消编辑</Button>
+			</div>
 		</div>
-	</div>
-	<form>
 		<div class="grid grid-cols-8 gap-3 grid-rows-4">
 			<div class="col-span-2 row-span-4 mb-10">
 				<Label for="deckCover" class="mt-2 mb-2">卡组封面</Label>
@@ -303,11 +386,17 @@
 				</div>
 				<div class="col-span-2">
 					<Label for="deckPrice" class="mt-2 mb-2">价格(￥)</Label>
-					<Input type="number" id="deckPrice" required bind:value={deckPrice} />
+					<Input type="number" id="deckPrice" bind:value={deckPrice} />
+					{#if priceErrorMessage}
+						<Helper class="mt-1" color="red">{priceErrorMessage}</Helper>
+					{/if}
 				</div>
 				<div class="col-span-2">
 					<Label for="deckCount" class="mt-2 mb-2">卡片数量</Label>
-					<Input type="number" id="deckCount" required bind:value={deckCount} />
+					<Input type="number" id="deckCount" bind:value={deckCount} />
+					{#if deckCountErrorMessage}
+						<Helper class="mt-1" color="red">{deckCountErrorMessage}</Helper>
+					{/if}
 				</div>
 				<div class="col-span-2">
 					<Label for="deckSupportPlatform" class="mt-2 mb-2">支持平台</Label>
@@ -315,6 +404,7 @@
 						bind:value={selectedPlatform}
 						items={supportPlatformList}
 						id="deckSupportPlatform"
+						required
 					/>
 				</div>
 				<div class="col-span-2">
