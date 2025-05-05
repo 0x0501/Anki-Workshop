@@ -42,7 +42,7 @@
 <!-- navigation only render for `/decks/inspect` and `/decks/preview`-->
 {#if page.route.id?.startsWith('/decks') || page.route.id?.startsWith('/decks/preview/')}
 	<div
-		class="flex items-center gap-3 justify-between pr-4 md:pr-6 py-3 divide-gray-200 dark:divide-gray-700 border-gray-200 dark:border-gray-700 border-b"
+		class="min-h-14 flex items-center gap-3 justify-between pr-4 md:pr-6 py-3 divide-gray-200 dark:divide-gray-700 border-gray-200 dark:border-gray-700 border-b"
 	>
 		<!-- back to decks -->
 		<a

@@ -1,25 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
-
-	export interface DeckItem {
-		// Image url
-		src: string;
-		// alternative name
-		alt: string;
-		// deck id
-		identifier: string;
-		// deck name
-		name?: string;
-		// deck description
-		description?: string;
-		// deck  category
-		category?: string;
-	}
+	import type { DeckData } from '../../routes/+layout.server';
 
 	export interface DeckGalleryProps {
 		class?: string;
-		items: DeckItem[];
-		category?: string; // Add category prop
+		items: DeckData[];
+		tag?: string; // Add category prop
 	}
 	let props: DeckGalleryProps = $props();
 
@@ -27,15 +13,14 @@
 </script>
 
 <div class={`grid grid-cols-2 md:grid-cols-3 gap-4 ${props.class}`}>
-	{#each props.items as deck (deck.identifier)}
-		{@const isVisible = !props.category || props.category === 'all' || deck.category === props.category}
+	{#each props.items as deck (deck.id)}
 		<a
 			class="flex flex-col justify-center align-middle gap-3"
-			class:hidden={!isVisible}
-			href={`${page.url.pathname}decks/${deck.identifier}`}
+			class:hidden={props.tag && !deck.deck_tags?.includes(props.tag)}
+			href={`${page.url.pathname}decks/${deck.id}`}
 		>
-			<img class="h-auto max-w-full rounded-lg" src={deck.src} alt={deck.alt} />
-			<p class="font-normal text-gray-700 leading-tight">{deck.alt}</p>
+			<img class="h-auto max-w-full rounded-lg" src={'/front.jpg'} alt={deck.deck_name} />
+			<p class="font-normal text-gray-700 leading-tight">{deck.deck_name}</p>
 		</a>
 	{/each}
 </div>

@@ -8,55 +8,28 @@
 	const { data } = $props();
 	const settings = data.system_settings;
 
-	// maximum 8 badges
-	const testBadges = ['英语', '考研', '学习', '公共课', '词汇', 'CET-4', 'CET-6', '考神'];
-	const deckSize = 132303; // bytes
-	const deckCount = 300;
-	const deckLikeByPeople = 0;
-
 	// if deck price is zero(0), display it as free.
-	// the currency Chinese Yuan
-	const deckPrice = 10;
-	// Unix timestamp
-	const lastUpdatedTimestamp = 1745753668;
 
-	const deckTitle = 'Deck标题';
+	const currentSelectedDeckId = Number(
+		page.url.pathname.slice(page.url.pathname.lastIndexOf('/') + 1)
+	);
 
-	const deckDescription = `Lorem ipsum dolor sit amet consectetur adipiscing elit. Ex sapien vitae pellentesque sem
-				placerat in id. Pretium tellus duis convallis tempus leo eu aenean. Urna tempor pulvinar
-				vivamus fringilla lacus nec metus. Iaculis massa nisl malesuada lacinia integer nunc
-				posuere. Semper vel class aptent taciti sociosqu ad litora. Conubia nostra inceptos
-				himenaeos orci varius natoque penatibus. Dis parturient montes nascetur ridiculus mus donec
-				rhoncus. Nulla molestie mattis scelerisque maximus eget fermentum odio. Purus est efficitur
-				laoreet mauris pharetra vestibulum fusce.`;
+	const currentSelectedDeckData = $state(
+		data.deck_data.filter((item) => item.id === currentSelectedDeckId)[0]
+	);
 
-	const deckAuthor = 'Jack';
+	const deckSupportPlatform = $derived.by(() => {
+		const sup = JSON.parse(currentSelectedDeckData.support_platform) as Array<string>;
+
+		if (sup.includes('All')) {
+			return ['Windows', 'MacOS', 'iOS', 'Android'];
+		} else {
+			return sup;
+		}
+	});
+
 	const authorBio = 'Learning everything in Anki.';
 
-	interface supportPlatformOption {
-		platform: 'Windows' | 'MacOS' | 'iOS' | 'Android';
-		minVersion?: string;
-	}
-
-	// Anki has 4 major platform
-	let supportPlatform: supportPlatformOption[] | 'all' = [
-		{
-			platform: 'Windows',
-			minVersion: '2'
-		},
-		{
-			platform: 'MacOS',
-			minVersion: '2'
-		},
-		{
-			platform: 'iOS',
-			minVersion: '2'
-		},
-		{
-			platform: 'Android',
-			minVersion: '2'
-		}
-	];
 	// whether current user followed the deck author
 	let isFollowedAuthor = $state(true);
 	// whether current user was official account
@@ -68,8 +41,8 @@
 
 	// update navbar
 
-	deckNavState.deckTitle = deckTitle;
-	deckNavState.deckLikeByPeople = deckLikeByPeople;
+	deckNavState.deckTitle = currentSelectedDeckData.deck_name;
+	deckNavState.deckLikeByPeople = currentSelectedDeckData.deck_liked_by_people ?? 0;
 	deckNavState.isDeckLikeByCurrentUser = false;
 </script>
 
@@ -88,7 +61,7 @@
 				<div class="inline-flex flex-col justify-center grow">
 					<!-- author nickname -->
 					<div class="text-sm md:text-lg font-bold inline-flex gap-1 items-center">
-						{deckAuthor}
+						{currentSelectedDeckData.deck_author_id}
 						{#if isOfficialAccount}
 							<BadgeCheckSolid color="#1677ff" class="size-4 md:size-5" />
 							<Tooltip class="text-xs sm:text-sm">官方账号</Tooltip>
@@ -114,25 +87,27 @@
 			</div>
 
 			<div class="text-wrap text-justify">
-				<p class="font-bold block md:hidden">{deckTitle}</p>
-				<p class="min-h-50">{deckDescription}</p>
+				<p class="font-bold block md:hidden">{currentSelectedDeckData.deck_name}</p>
+				<p class="min-h-50">{currentSelectedDeckData.deck_description}</p>
 			</div>
 			<div class="flex flex-col col-span-full md:order-3 gap-3">
 				<div class="inline-flex gap-1 gap-y-1.5 md:gap-3 flex-wrap">
 					标签：
-					{#each testBadges as badge}
+					{#each JSON.parse(currentSelectedDeckData.deck_tags ?? '[]') as badge}
 						<Badge>{badge}</Badge>
 					{/each}
 				</div>
 				<div
 					class="flex-col gap-2 @lg:flex-row text-gray-500 inline-flex justify-between font-normal text-sm"
 				>
-					<span>卡组大小：{(deckSize / 1024).toFixed(2)}M | 卡片数量：{deckCount}</span>
-					<span>最后更新日期：{formatDateFromTimestamp(lastUpdatedTimestamp)}</span>
+					<span
+						>卡组大小：{(currentSelectedDeckData.deck_size / 1024).toFixed(2)}M | 卡片数量：{currentSelectedDeckData.deck_card_count}</span
+					>
+					<span>最后更新日期：{currentSelectedDeckData.last_updated_date}</span>
 				</div>
 				<!-- Price -->
 				<div>
-					<span class="text-sm text-gray-500">价格: ￥{deckPrice}</span>
+					<span class="text-sm text-gray-500">价格: ￥{currentSelectedDeckData.deck_price}</span>
 				</div>
 				<Hr class="block md:hidden" hrClass="h-px my-2 bg-gray-200 border-0 dark:bg-gray-700" />
 			</div>
@@ -145,13 +120,13 @@
 						>支持平台：</Heading
 					>
 					<List tag="ul" class="space-y-1 text-gray-500 dark:text-gray-400">
-						{#each supportPlatform as platform (platform.platform)}
-							<Li>{platform.platform}</Li>
+						{#each deckSupportPlatform as platform (platform)}
+							<Li>{platform}</Li>
 						{/each}
 					</List>
 				</div>
 				<!-- button group for download, preview and import -->
-				<div class="col-span-full md:col-span-2 flex flex-col gap-3 mt-3 md:mt-0">
+				<div class="col-span-full md:col-span-2 flex flex-col gap-3 mt-3 md:mt-0 just">
 					<Button color="alternative" class="md:w-3/4">一键导入Anki（.apkg）</Button>
 					<Button
 						color="alternative"
