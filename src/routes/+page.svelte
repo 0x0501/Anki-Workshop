@@ -5,12 +5,13 @@
 		Button,
 		Search,
 		Footer,
-		FooterBrand,
 		FooterCopyright,
-		FooterIcon,
-		FooterLink,
-		FooterLinkGroup
 	} from 'flowbite-svelte';
+
+	const { data } = $props();
+
+	console.log('/home')
+	console.log(data)
 
 	const images: DeckItem[] = [
 		{

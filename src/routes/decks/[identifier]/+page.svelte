@@ -5,6 +5,9 @@
 	import { Badge, Button, Heading, Hr, Li, List, Tooltip } from 'flowbite-svelte';
 	import { BadgeCheckSolid, CheckOutline } from 'flowbite-svelte-icons';
 
+	const { data } = $props();
+	const settings = data.system_settings;
+
 	// maximum 8 badges
 	const testBadges = ['英语', '考研', '学习', '公共课', '词汇', 'CET-4', 'CET-6', '考神'];
 	const deckSize = 132303; // bytes
@@ -94,17 +97,19 @@
 					<!-- author bio -->
 					<span class="text-gray-500 text-xs sm:text-sm md:text-md">{authorBio}</span>
 				</div>
-				{#if isFollowedAuthor}
-					<Button
-						class="min-w-20 h-8 px-2 md:h-10 self-center gap-1 text-xs sm:text-sm"
-						color="alternative"
-						onclick={changeFollowStatus}><CheckOutline />已关注</Button
-					>
-				{:else}
-					<Button
-						class="min-w-16 h-8 px-2 md:h-10 self-center text-xs sm:text-sm"
-						onclick={changeFollowStatus}>关注</Button
-					>
+				{#if settings.enable_user_follow_func}
+					{#if isFollowedAuthor}
+						<Button
+							class="min-w-20 h-8 px-2 md:h-10 self-center gap-1 text-xs sm:text-sm"
+							color="alternative"
+							onclick={changeFollowStatus}><CheckOutline />已关注</Button
+						>
+					{:else}
+						<Button
+							class="min-w-16 h-8 px-2 md:h-10 self-center text-xs sm:text-sm"
+							onclick={changeFollowStatus}>关注</Button
+						>
+					{/if}
 				{/if}
 			</div>
 
@@ -151,7 +156,8 @@
 					<Button
 						color="alternative"
 						class="md:w-3/4"
-						href={page.url.pathname.replace('inspect', 'preview')}>预览</Button
+						href={`/decks/preview/${page.url.pathname.slice(page.url.pathname.lastIndexOf('/') + 1)}`}
+						>预览</Button
 					>
 					<Button color="blue" class="md:w-3/4">在线学习</Button>
 				</div>

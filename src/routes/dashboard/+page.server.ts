@@ -3,6 +3,7 @@ import { UserRole, users, workshop_settings } from '$lib/database/schema';
 import { and, eq, type InferSelectModel } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
 
+// infer database schema into types
 type WorkshopSettings = InferSelectModel<typeof workshop_settings>;
 
 export const load: PageServerLoad = async (
