@@ -5,7 +5,6 @@
 		BreadcrumbItem,
 		Button,
 		Dropzone,
-		Fileupload,
 		Heading,
 		Helper,
 		Hr,
@@ -19,10 +18,18 @@
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
 	import { RESTfulApiBase, type RESTfulApiResponse } from '$lib/api';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { enhance } from '$app/forms';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, tick } from 'svelte';
 	import { z } from 'zod';
+	import CodeMirror from 'svelte-codemirror-editor';
+	import { html } from '@codemirror/lang-html';
+	import type { StringifyOptions } from 'querystring';
+	import type { DeckData } from '../../routes/+layout.server';
+
+	// Store as JSON.stringify()
+	let deckFrontPreviewCode = $state<string>();
+	let deckBackPreviewCode = $state<string>();
 
 	let selectedPlatform = $state([]);
 	let supportPlatformList: SelectOptionType<string>[] = [
@@ -38,15 +45,41 @@
 		{ value: 'CET-4', name: 'CET-4' },
 		{ value: 'CET-6', name: 'CET-6' },
 		{ value: '考研', name: '考研' },
-		{ value: '考编', name: '考编' }
+		{ value: '考编', name: '考编' },
+		{ value: '教资', name: '教资' },
+		{ value: '英语', name: '英语' },
+		{ value: '计算机', name: '计算机' }
 	];
 
 	interface DeckEditorProps {
 		editorType: 'Create' | 'Edit';
+		deckData?: DeckData;
 	}
+
+	type DeckEditData = {
+		deck_id?: number;
+		deck_name: string;
+		deck_author_id: string | undefined;
+		deck_description: string;
+		deck_card_count: number;
+		deck_price: number;
+		is_deck_on_sale: boolean;
+		support_platform: string;
+		deck_cover_image_url: string;
+		deck_tags: string;
+		deck_download_link: string;
+		deck_compress_password: string;
+		deck_purchase_link: string;
+		deck_front_preview_code: string;
+		deck_back_preview_code: string;
+	};
+
 	let props: DeckEditorProps = $props();
 
-	let deckFile = $state('');
+	let deckFileDownloadURL = $state('');
+	let deckFilePassword = $state('');
+
+	let deckPurchaseLink = $state('');
 
 	let deckDescription = $state('');
 
@@ -54,13 +87,80 @@
 	let deckPrice = $state(0);
 	let deckCount = $state(0);
 
-	let priceErrorMessage = $state('');
-	let deckCountErrorMessage = $state('');
+	let formErrors = $state<{
+		deckName?: string;
+		deckPrice?: string;
+		deckCount?: string;
+		deckFileDownloadURL?: string;
+		deckFilePassword?: string;
+		deckPurchaseLink?: string;
+		deckDescription?: string;
+		selectedPlatform?: string;
+		selectedTags?: string;
+		deckFrontPreviewCode?: StringifyOptions;
+		deckBackPreviewCode?: StringifyOptions;
+		deckSnapshots?: string; // For the refinement error
+	}>({});
 
 	// Form input validation
+	const deckSchema = z
+		.object({
+			deckName: z.string().nonempty('卡组名称不能为空'),
+			deckPrice: z.number().min(0.01, '价格最少为0.01'),
+			deckCount: z.number().min(1, '卡片数量最低为1张'),
+			deckFileDownloadURL: z.string().nonempty('下载链接不能为空'),
+			deckFilePassword: z.string(), // Optional for now
+			deckPurchaseLink: z.string().nonempty('购买链接不能为空'), // Optional for now
+			deckDescription: z.string().nonempty('卡组描述不能为空'),
+			selectedPlatform: z.array(z.string()).min(1, '请选择至少一个支持平台'),
+			selectedTags: z.array(z.string()).min(1, '请选择至少一个标签'),
+			deckFrontPreviewCode: z.string().nonempty('正面预览代码不能为空'),
+			deckBackPreviewCode: z.string().nonempty('背面预览代码不能为空')
+		})
+		.refine((data) => deckSnapshots.length > 0 && deckSnapshots.every((img) => img.isCropped), {
+			message: '请上传至少一张已裁剪的卡组快照',
+			path: ['deckSnapshots'] // Associate error with a conceptual field
+		});
 
-	let priceVerifySchema = z.number().min(0.01, '价格最少为0.01');
-	let deckCountVerifySchema = z.number().min(1, '卡片数量最低为1张');
+	const validateForm = () => {
+		const result = deckSchema.safeParse({
+			deckName,
+			deckPrice,
+			deckCount,
+			deckFileDownloadURL,
+			deckFilePassword,
+			deckPurchaseLink,
+			deckDescription,
+			selectedPlatform,
+			selectedTags,
+			deckFrontPreviewCode,
+			deckBackPreviewCode,
+			deckSnapshots // Pass deckSnapshots for refinement
+		});
+
+		if (!result.success) {
+			// Map Zod errors to formErrors state
+			formErrors = result.error.issues.reduce(
+				(acc, issue) => {
+					// Zod path is an array of strings/numbers, join for simple field names
+					const path = issue.path.join('.');
+					// Handle the special 'deckSnapshots' path from refinement
+					if (path === 'deckSnapshots') {
+						acc.deckSnapshots = issue.message;
+					} else {
+						// Assuming path matches state variable names
+						acc[path as keyof typeof formErrors] = issue.message;
+					}
+					return acc;
+				},
+				{} as typeof formErrors
+			);
+			return false; // Validation failed
+		} else {
+			formErrors = {}; // Clear errors on success
+			return true; // Validation succeeded
+		}
+	};
 
 	// State to hold multiple images for snapshots
 	type DeckSnapshot = {
@@ -121,7 +221,6 @@
 		}
 		imageCropModalStatus = false;
 		currentImageIndexToCrop = null;
-
 	};
 
 	const dropHandle = async (event: DragEvent) => {
@@ -168,6 +267,9 @@
 
 	const handleChange = async (event: Event) => {
 		const target = event.target as HTMLInputElement;
+		console.log('call');
+
+		console.warn(deckSnapshots)
 		if (target.files && target.files.length > 0) {
 			if (deckSnapshots.length >= 5) {
 				console.warn('Maximum 5 images allowed.');
@@ -209,8 +311,38 @@
 		return deckSnapshots.length > 0 && deckSnapshots.every((img) => img.isCropped);
 	});
 
+	$effect(() => {
+		if (props.editorType === 'Edit' && props.deckData) {
+			// Get values from props.data
+			deckName = props.deckData.deck_name;
+			deckPrice = props.deckData.deck_price ?? 0.01;
+			deckCount = props.deckData.deck_card_count ?? 0;
+			selectedPlatform = JSON.parse(props.deckData.support_platform);
+			selectedTags = JSON.parse(props.deckData.deck_tags ?? '[]');
+			deckFileDownloadURL = props.deckData.deck_download_link;
+			deckFilePassword = props.deckData.deck_compress_password ?? '';
+			deckPurchaseLink = props.deckData.deck_purchase_link;
+			deckDescription = props.deckData.deck_description;
+			deckCoverImageUrl = props.deckData.deck_cover_image_url ?? '';
+
+			// Add a small delay before setting CodeMirror values
+			tick().then(() => {
+				deckFrontPreviewCode = JSON.parse(props?.deckData?.deck_front_preview_code ?? '');
+				deckBackPreviewCode = JSON.parse(props?.deckData?.deck_back_preview_code ?? ''); // Corrected
+				deckSnapshots.push({
+					id: 0,
+					dataUrl: props?.deckData?.deck_cover_image_url ?? '',
+					blob: new Blob(),
+					isCropped: true
+				});
+			}); // Use 50ms delay to give CodeMirror time to initialize
+		}
+	});
+
 	// free memory and Blob URL
-	onDestroy(() => {});
+	onDestroy(() => {
+		deckSnapshots = [];
+	});
 </script>
 
 <div>
@@ -225,30 +357,15 @@
 			cancel();
 
 			// Input validation
-			// 1. Price validation
-			let priceVerifyResult = priceVerifySchema.safeParse(deckPrice, {});
-
-			if (!priceVerifyResult.success) {
-				priceErrorMessage = priceVerifyResult.error.issues[0].message;
-				return;
-			} else {
-				priceErrorMessage = '';
-			}
-
-			// 2. Card count validation
-			let deckCountVerifyResult = deckCountVerifySchema.safeParse(deckCount);
-
-			if (!deckCountVerifyResult.success) {
-				deckCountErrorMessage = deckCountVerifyResult.error.issues[0].message;
-				return;
-			} else {
-				deckCountErrorMessage = '';
+			if (!validateForm()) {
+				console.log('Form validation failed', formErrors);
+				return; // Stop if validation fails
 			}
 
 			let finalCoverImageUrl = '';
 
 			// 1. Upload image to cloudflare r2 (or local equivalent) if it's a data URL
-			if (deckCoverImageBlob) {
+			if ((deckCoverImageBlob as Blob).size > 0) {
 				try {
 					const formData = new FormData();
 					formData.append('deckCoverImageBlob', deckCoverImageBlob as Blob, 'deckCoverImageBlob');
@@ -275,7 +392,7 @@
 			}
 
 			// 2. Compose POST request body with the final image URL and send it to API End point
-			const deckData = {
+			const deckData: DeckEditData = {
 				deck_name: deckName,
 				deck_author_id: page.data.session?.user.id, // Use get(page) to access store value
 				deck_description: deckDescription,
@@ -283,13 +400,29 @@
 				deck_price: Number(deckPrice), // Ensure it's a number
 				is_deck_on_sale: true, // Default to true as per original logic
 				support_platform: JSON.stringify(selectedPlatform), // Serialized array
-				deck_cover_image_url: finalCoverImageUrl, // Use the URL from R2 or original if not uploaded
-				deck_tags: JSON.stringify(selectedTags) // Serialized array
+				deck_cover_image_url: props.editorType === 'Edit' ? deckCoverImageUrl : deckFileDownloadURL, // Use the URL from R2 or original if not uploaded
+				deck_tags: JSON.stringify(selectedTags), // Serialized array
+				deck_download_link: deckFileDownloadURL,
+				deck_compress_password: deckFilePassword,
+				deck_purchase_link: deckPurchaseLink,
+				deck_front_preview_code: JSON.stringify(deckFrontPreviewCode),
+				deck_back_preview_code: JSON.stringify(deckBackPreviewCode)
 			};
+
+			if (props.editorType === 'Edit') {
+				// if the component is under `Edit` mode
+
+				let currentEditDeckId = Number(
+					page.url.pathname.slice(page.url.pathname.lastIndexOf('/') + 1)
+				);
+
+				// define new property for PUT
+				deckData.deck_id = currentEditDeckId;
+			}
 
 			try {
 				const response = await fetch(`${RESTfulApiBase}/decks`, {
-					method: 'POST',
+					method: props.editorType === 'Create' ? 'POST' : 'PUT',
 					headers: {
 						'Content-Type': 'application/json'
 					},
@@ -302,8 +435,9 @@
 					console.log('Deck created successfully:', result);
 					// TODO: handle when success, e.g., navigate to deck list page
 					// show a notification
-					setTimeout(() => {
-						goto('/dashboard/decks', { invalidateAll: true });
+					setTimeout(async () => {
+						await invalidateAll();
+						await goto('/dashboard/decks')
 					}, 500);
 				} else {
 					console.error('Failed to create deck:', result);
@@ -331,89 +465,73 @@
 			</div>
 		</div>
 		<div class="grid grid-cols-8 gap-3 grid-rows-4">
-			<div class="col-span-2 row-span-4 mb-10">
-				<Label for="deckCover" class="mt-2 mb-2">卡组封面</Label>
-				{#if deckSnapshots.length > 0}
-					<!-- Display the first image as cover preview -->
-					<div class="inline-flex flex-col gap-3">
-						<button onclick={() => openCropModal(0)}>
-							<img
-								src={deckSnapshots[0].dataUrl}
-								alt="Uploaded cover"
-								class="max-w-full object-contain rounded-md border-2"
-								class:border-gray-100={!deckSnapshots[0].isCropped}
-								class:border-green-500={deckSnapshots[0].isCropped}
-							/>
-						</button>
-
-						<p
-							class="text-sm mt-1 text-center"
-							class:text-green-600={deckSnapshots[0].isCropped}
-							class:text-red-600={!deckSnapshots[0].isCropped}
-						>
-							{deckSnapshots[0].isCropped ? '已裁剪' : '未裁剪'}
-						</p>
-					</div>
-				{:else}
-					<Dropzone id="deckCover" ondrop={dropHandle} onchange={handleChange} class="h-full">
-						<svg
-							aria-hidden="true"
-							class="mb-3 w-10 h-10 text-gray-400"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-							><path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-							/></svg
-						>
-
-						<!-- Default Dropzone content -->
-						<p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-							<span class="font-semibold">点击上传</span> 或拖拽文件
-						</p>
-						<p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 5张)</p>
-					</Dropzone>
-				{/if}
-			</div>
-			<div class="flex flex-col col-span-6 row-span-4">
+			<div class="flex flex-col col-span-full row-span-4">
 				<div class="col-span-2">
 					<Label for="deckName" class="mt-2 mb-2">卡组名称</Label>
 					<Input type="text" id="deckName" required bind:value={deckName} />
-				</div>
-				<div class="col-span-2">
-					<Label for="deckPrice" class="mt-2 mb-2">价格(￥)</Label>
-					<Input type="number" id="deckPrice" bind:value={deckPrice} />
-					{#if priceErrorMessage}
-						<Helper class="mt-1" color="red">{priceErrorMessage}</Helper>
+					{#if formErrors.deckName}
+						<Helper class="mt-1" color="red">{formErrors.deckName}</Helper>
 					{/if}
 				</div>
-				<div class="col-span-2">
-					<Label for="deckCount" class="mt-2 mb-2">卡片数量</Label>
-					<Input type="number" id="deckCount" bind:value={deckCount} />
-					{#if deckCountErrorMessage}
-						<Helper class="mt-1" color="red">{deckCountErrorMessage}</Helper>
+				<div class="col-span-2 inline-flex w-full gap-3">
+					<div class="w-full">
+						<Label for="deckPrice" class="mt-2 mb-2">价格(￥)</Label>
+						<Input type="number" id="deckPrice" bind:value={deckPrice} />
+						{#if formErrors.deckPrice}
+							<Helper class="mt-1" color="red">{formErrors.deckPrice}</Helper>
+						{/if}
+					</div>
+					<div class="w-full">
+						<Label for="deckCount" class="mt-2 mb-2">卡片数量</Label>
+						<Input type="number" id="deckCount" bind:value={deckCount} />
+						{#if formErrors.deckCount}
+							<Helper class="mt-1" color="red">{formErrors.deckCount}</Helper>
+						{/if}
+					</div>
+				</div>
+				<div class="col-span-2 inline-flex gap-3 flex-col md:flex-row">
+					<div class="w-full">
+						<Label for="deckSupportPlatform" class="mt-2 mb-2">支持平台</Label>
+						<MultiSelect
+							bind:value={selectedPlatform}
+							items={supportPlatformList}
+							name="deckSupportPlatform"
+							id="deckSupportPlatform"
+						/>
+						{#if formErrors.selectedPlatform}
+							<Helper class="mt-1" color="red">{formErrors.selectedPlatform}</Helper>
+						{/if}
+					</div>
+					<div class="w-full">
+						<Label for="deckTags" class="mt-2 mb-2">标签</Label>
+						<MultiSelect bind:value={selectedTags} items={deckTagOptions} id="deckTags" />
+						{#if formErrors.selectedTags}
+							<Helper class="mt-1" color="red">{formErrors.selectedTags}</Helper>
+						{/if}
+					</div>
+				</div>
+				<div class="col-span-2 inline-flex w-full gap-3">
+					<div class="w-full">
+						<Label for="deckFileDownloadURL" class="mt-2 mb-2">卡组下载链接</Label>
+						<Input bind:value={deckFileDownloadURL} id="deckFileDownloadURL" />
+						{#if formErrors.deckFileDownloadURL}
+							<Helper class="mt-1" color="red">{formErrors.deckFileDownloadURL}</Helper>
+						{/if}
+					</div>
+					<div class="w-full">
+						<Label for="deckFilePassword" class="mt-2 mb-2">解压密码</Label>
+						<Input bind:value={deckFilePassword} id="deckFilePassword" />
+						{#if formErrors.deckFilePassword}
+							<Helper class="mt-1" color="red">{formErrors.deckFilePassword}</Helper>
+						{/if}
+					</div>
+				</div>
+				<div>
+					<Label for="deckPurchaseLink" class="mt-2 mb-2">购买链接</Label>
+					<Input bind:value={deckPurchaseLink} id="deckPurchaseLink" />
+					{#if formErrors.deckPurchaseLink}
+						<Helper class="mt-1" color="red">{formErrors.deckPurchaseLink}</Helper>
 					{/if}
-				</div>
-				<div class="col-span-2">
-					<Label for="deckSupportPlatform" class="mt-2 mb-2">支持平台</Label>
-					<MultiSelect
-						bind:value={selectedPlatform}
-						items={supportPlatformList}
-						id="deckSupportPlatform"
-						required
-					/>
-				</div>
-				<div class="col-span-2">
-					<Label for="deckTags" class="mt-2 mb-2">标签</Label>
-					<MultiSelect bind:value={selectedTags} items={deckTagOptions} id="deckTags" />
-				</div>
-				<div class="col-span-2">
-					<Label for="deckFile" class="mt-2 mb-2">卡组文件</Label>
-					<Fileupload bind:value={deckFile} id="deckFile" />
 				</div>
 				<div class="col-start-3 col-span-6">
 					<Label for="deckDescription" class="mt-2 mb-2">卡组描述</Label>
@@ -425,7 +543,37 @@
 						rows={5}
 						required
 					/>
+					{#if formErrors.deckDescription}
+						<Helper class="mt-1" color="red">{formErrors.deckDescription}</Helper>
+					{/if}
 				</div>
+			</div>
+			<!-- <div class="col-span-full lg:col-span-2 row-span-4 mb-10 bg-red-400">
+		
+			</div> -->
+		</div>
+		<div class="flex flex-col md:flex-row gap-3">
+			<div class="w-full">
+				<Label for="deckDescription" class="mt-2 mb-2">卡组预览（正面代码）</Label>
+				<CodeMirror
+					bind:value={deckFrontPreviewCode}
+					lang={html()}
+					placeholder="卡片的正面代码（HTML, Javascript, CSS）"
+				/>
+				{#if formErrors.deckFrontPreviewCode}
+					<Helper class="mt-1" color="red">{formErrors.deckFrontPreviewCode}</Helper>
+				{/if}
+			</div>
+			<div class="w-full">
+				<Label for="deckDescription" class="mt-2 mb-2">卡组预览（背面代码）</Label>
+				<CodeMirror
+					bind:value={deckBackPreviewCode}
+					lang={html()}
+					placeholder="卡片的背面代码（HTML, Javascript, CSS）"
+				/>
+				{#if formErrors.deckBackPreviewCode}
+					<Helper class="mt-1" color="red">{formErrors.deckBackPreviewCode}</Helper>
+				{/if}
 			</div>
 		</div>
 	</form>
@@ -433,14 +581,17 @@
 	<!-- deck snapshot preview -->
 	<div class="mt-6 flex flex-col h-auto">
 		<Label class="mt-2 mb-2">卡组快照预览 (最多5张)</Label>
-		<div class="grid grid-cols-5 gap-4 auto-rows-auto">
-			{#each deckSnapshots.slice(1) as snapshot, index (snapshot.id)}
+		{#if formErrors.deckSnapshots}
+			<Helper class="mt-1" color="red">{formErrors.deckSnapshots}</Helper>
+		{/if}
+		<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 auto-rows-auto">
+			{#each deckSnapshots as snapshot, index (props.editorType === 'Edit' ? snapshot.dataUrl.slice(10) : snapshot.id)}
 				<div class="flex flex-col items-center h-full">
 					<button
 						class="relative w-full border-2 rounded-md overflow-hidden cursor-pointer h-full"
 						class:border-gray-100={!snapshot.isCropped}
 						class:border-green-500={snapshot.isCropped}
-						onclick={() => openCropModal(index + 1)}
+						onclick={() => openCropModal(index)}
 					>
 						<img
 							src={snapshot.dataUrl}
@@ -449,7 +600,7 @@
 						/>
 						{#if !snapshot.isCropped}
 							<div
-								class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg font-bold"
+								class="absolute inset-0 flex items-center justify-center bg-opacity-50 text-blue-500 text-lg font-bold"
 							>
 								点击裁剪
 							</div>
@@ -472,7 +623,7 @@
 					onchange={handleChange}
 					class="w-full aspect-video flex items-center justify-center border-2 border-dashed rounded-md cursor-pointer"
 				>
-					<div class="flex flex-col items-center justify-center pt-5 pb-6">
+					<div class="flex flex-col items-center justify-center pt-5 pb-6 p-2">
 						<svg
 							aria-hidden="true"
 							class="mb-3 w-10 h-10 text-gray-400"

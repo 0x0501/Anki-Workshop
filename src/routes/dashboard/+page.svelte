@@ -10,6 +10,7 @@
 	let enableShowingFollower = $state(data.system_settings.enable_showing_follower);
 	let enableUserFollowFunc = $state(data.system_settings.enable_user_follow_func);
 	let enableDeckFavoriteFunc = $state(data.system_settings.enable_deck_favorite_func);
+	let enableOnlineStudyFunc = $state(data.system_settings.enable_online_study_func)
 
 	console.log('worksettings:')
 	console.log(data)
@@ -51,7 +52,7 @@
 
 <div class="flex flex-col">
 	<Heading tag="h4" class="">网站设置</Heading>
-	<div class="mt-5 flex gap-3 flex-col">
+	<div class="mt-5 flex gap-3 flex-col items-start">
 		<!-- Toggle for Allow User Register -->
 		<form method="POST" action="?/updateSetting" use:enhance={handleToggleSubmit}>
 			<!-- <input type="hidden" name="settingName" value="allow_user_register" /> -->
@@ -89,5 +90,13 @@
 				on:change={handleToggleChange}>启用卡组收藏功能</Toggle
 			>
 		</form>
+			<!-- Toggle for Enable Deck Favorite Func -->
+			<form method="POST" action="?/updateSetting" use:enhance={handleToggleSubmit}>
+				<Toggle
+					name="enable_online_study_func"
+					bind:checked={enableOnlineStudyFunc}
+					on:change={handleToggleChange}>启用在线学习功能</Toggle
+				>
+			</form>
 	</div>
 </div>

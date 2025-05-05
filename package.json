@@ -16,6 +16,7 @@
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250504.0",
+		"@codemirror/lang-html": "^6.4.9",
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
 		"@fortawesome/fontawesome-svg-core": "^6.7.2",
@@ -42,6 +43,7 @@
 		"prettier-plugin-svelte": "^3.3.3",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
+		"svelte-codemirror-editor": "^1.4.1",
 		"tailwindcss": "^4.0.0",
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.20.0",

@@ -69,11 +69,6 @@
 					{/if}
 				</button>
 			{/if}
-
-			<!-- if user logged in display avatar -->
-			{#if data.session}
-				<Avatar size="md" />
-			{/if}
 		</div>
 	</div>
 {/if}

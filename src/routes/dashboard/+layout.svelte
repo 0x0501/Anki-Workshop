@@ -7,7 +7,10 @@
 		Sidebar,
 		SidebarWrapper,
 		SidebarGroup,
-		SidebarItem
+		SidebarItem,
+
+		A
+
 	} from 'flowbite-svelte';
 
 	import { library } from '@fortawesome/fontawesome-svg-core';
@@ -29,7 +32,7 @@
 	class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 flex items-center gap-3 justify-between px-4 md:pr-8 py-3 divide-gray-200 dark:divide-gray-700 border-gray-200 dark:border-gray-700 border-b"
 >
 	<!-- back to decks -->
-	<P weight="bold" class="text-gray-600">Anki workshop</P>
+	<P weight="bold" class="text-gray-600"><A href="/" class="no-underline hover:no-underline text-gray-600">Anki workshop</A></P>
 	<div class="inline-flex gap-3 items-center">
 		<!-- <button class="inline-flex flex-col items-center text-xs">
 			<FontAwesomeIcon icon={faBell} class="text-gray-600" size="lg" />
@@ -61,7 +64,7 @@
 <div class="grid grid-cols-12 p-2 pl-3 pt-20">
 	<Sidebar
 		activeClass="flex items-center p-2 text-base font-normal text-primary-900 bg-primary-200 dark:bg-primary-700 rounded-lg dark:text-white hover:bg-primary-100 dark:hover:bg-gray-700"
-		asideClass="col-span-2"
+		asideClass="col-span-full lg:col-span-2"
 		{activeUrl}
 	>
 		<SidebarWrapper>
@@ -104,7 +107,7 @@
 			</SidebarGroup>
 		</SidebarWrapper>
 	</Sidebar>
-	<div class="col-span-10 p-4">
+	<div class="col-span-full lg:col-span-10 py-2 px-4">
 		{@render children()}
 	</div>
 </div>

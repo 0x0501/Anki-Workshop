@@ -216,11 +216,11 @@
 <div class="flex flex-col">
 	<Heading tag="h4" class="mb-2">所有卡组</Heading>
 
-	<div class="flex mb-3 pr-3 justify-between py-2 items-center">
+	<div class="flex flex-col gap-3 md:gap-1 md:flex-row mb-3 pr-3 justify-between py-2 items-center">
 		<form class="inline-flex gap-2 items-center">
 			<Search
 				size="md"
-				class="w-sm"
+				class="w-xs lg:w-sm"
 				bind:value={filterInputValue}
 				placeholder="搜索卡组名称"
 				oninput={handleTableInput}
@@ -249,7 +249,6 @@
 			<TableHeadCell>ID</TableHeadCell>
 			<TableHeadCell>名称</TableHeadCell>
 			<TableHeadCell>价格 (￥)</TableHeadCell>
-			<TableHeadCell>卡组大小</TableHeadCell>
 			<TableHeadCell>卡片数量</TableHeadCell>
 			<TableHeadCell>支持平台</TableHeadCell>
 			<TableHeadCell>当前状态</TableHeadCell>
@@ -271,7 +270,6 @@
 							: item.deck_name}</TableBodyCell
 					>
 					<TableBodyCell>{item.deck_price}</TableBodyCell>
-					<TableBodyCell>{(item.deck_size / 1024).toFixed(2)}MB</TableBodyCell>
 					<TableBodyCell>{item.deck_card_count}</TableBodyCell>
 					<TableBodyCell
 						><Badge color="dark">{JSON.parse(item.support_platform)[0]}</Badge></TableBodyCell

@@ -1,8 +1,8 @@
 import { integer, real, sqliteTable, text, index, primaryKey } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 import type { AdapterAccount } from '@auth/sveltekit/adapters';
-import type { supportPlatformOption } from '$lib/interfaces/supportPlatformOption';
-import { formatDateFromTimestamp } from '$lib/utils/helper';
+import type { supportPlatformOption } from '../../interfaces/supportPlatformOption';
+import { formatDateFromTimestamp } from '../../utils/helper';
 
 export enum UserRole {
 	Root = 1,
@@ -18,7 +18,7 @@ export const users = sqliteTable('users', {
 	username: text('username').unique().notNull(),
 	name: text('name'), // Added for Auth.js
 	emailVerified: integer('emailVerified', { mode: 'timestamp_ms' }), // Added for Auth.js
-	image: text('image'), // Added for Auth.js
+	image: text('image').notNull().default(''), // Added for Auth.js
 	hashed_password: text('hashed_password').notNull(),
 	created_at: text('created_at')
 		.notNull()
@@ -43,6 +43,9 @@ export const decks = sqliteTable(
 		deck_size: integer('deck_size').notNull().default(0),
 		deck_card_count: integer('deck_card_count'),
 		deck_price: real('deck_price'),
+		deck_download_link: text('deck_download_link').notNull(),
+		deck_compress_password: text('deck_compress_password'),
+		deck_purchase_link: text('deck_purchase_link').notNull(),
 		last_updated_date: text('last_updated_date')
 			.notNull()
 			.$default(() => formatDateFromTimestamp(Date.now(), true))
@@ -56,7 +59,9 @@ export const decks = sqliteTable(
 		// stored as serialized JSON Blob
 		support_platform: text('support_platform')
 			.notNull()
-			.default('All' as supportPlatformOption)
+			.default('All' as supportPlatformOption),
+		deck_front_preview_code: text('deck_front_preview_code').notNull(),
+		deck_back_preview_code: text('deck_back_preview_code').notNull(),
 	},
 	(table) => [index('deck_name_idx').on(table.deck_name)]
 );
@@ -71,6 +76,9 @@ export const workshop_settings = sqliteTable('workshop_setting', {
 		.notNull()
 		.default(true),
 	enable_deck_favorite_func: integer('enable_user_favorite_func', { mode: 'boolean' })
+		.notNull()
+		.default(true),
+	enable_online_study_func: integer('enable_user_favorite_func', { mode: 'boolean' })
 		.notNull()
 		.default(true)
 });

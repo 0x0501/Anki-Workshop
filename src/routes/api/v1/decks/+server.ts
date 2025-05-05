@@ -28,8 +28,17 @@ const verifyPostSchema = z.object({
 	// support_platform: serialized json object
 	support_platform: z.string().nonempty('支持平台不能为空'),
 	deck_cover_image_url: z.string().nonempty('卡组封面链接不能为空'),
+	deck_download_link: z.string().nonempty('卡组下载链接不能为空'),
+	deck_compress_password: z.string().optional(),
+	deck_purchase_link: z.string().nonempty('卡组购买链接不能为空'),
+	deck_front_preview_code: z.string().nonempty('卡组正面代码不能为空'),
+	deck_back_preview_code: z.string().nonempty('卡组正面代码不能为空'),
 	// deck_tags: serialized json object
 	deck_tags: z.string().optional()
+});
+
+const verifyPutSchema = verifyPostSchema.extend({
+	deck_id: z.number()
 });
 
 /**
@@ -67,7 +76,12 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 			deck_tags: result.data.deck_tags ?? '',
 			support_platform: result.data.support_platform,
 			deck_description: result.data.deck_description,
-			is_deck_on_sale: result.data.is_deck_on_sale
+			is_deck_on_sale: result.data.is_deck_on_sale,
+			deck_download_link: result.data.deck_download_link,
+			deck_compress_password: result.data.deck_compress_password,
+			deck_purchase_link: result.data.deck_purchase_link,
+			deck_front_preview_code: result.data.deck_front_preview_code,
+			deck_back_preview_code: result.data.deck_back_preview_code
 		})
 		.returning();
 
@@ -92,12 +106,60 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 /**
  * @description Modify a deck
  */
-export const PUT: RequestHandler = async () => {
-	return json({
-		status: 'success',
-		data: 'put',
-		error: null
-	});
+export const PUT: RequestHandler = async ({ locals, request }) => {
+	const data = await request.json();
+
+	const result = verifyPutSchema.safeParse(data);
+
+	if (!result.success) {
+		return json({
+			status: 'error',
+			data: null,
+			error: {
+				code: RESTfulApiErrorCode.IllegalInput,
+				message: `请求参数错误: ${result.error.message}`
+			}
+		} as RESTfulApiResponse);
+	}
+
+	const updateResult = await locals.db
+		.update(decks)
+		.set({
+			deck_name: result.data.deck_name,
+			deck_author_id: result.data.deck_author_id,
+			deck_card_count: result.data.deck_card_count,
+			deck_price: result.data.deck_price,
+			deck_cover_image_url: result.data.deck_cover_image_url,
+			deck_tags: result.data.deck_tags ?? '',
+			support_platform: result.data.support_platform,
+			deck_description: result.data.deck_description,
+			is_deck_on_sale: result.data.is_deck_on_sale,
+			deck_download_link: result.data.deck_download_link,
+			deck_compress_password: result.data.deck_compress_password,
+			deck_purchase_link: result.data.deck_purchase_link,
+			deck_front_preview_code: result.data.deck_front_preview_code,
+			deck_back_preview_code: result.data.deck_back_preview_code
+		})
+		.where(eq(decks.id, result.data.deck_id))
+		.returning();
+
+	if (updateResult.length > 0) {
+		return json({
+			status: 'success',
+			data: updateResult,
+			error: null
+		} as RESTfulApiResponse);
+	} else {
+		return json({
+			status: 'error',
+			data: null,
+			error: {
+				code: RESTfulApiErrorCode.DBUpdateError,
+				message: `更新牌组失败，数据库返回length为0`
+			}
+		} as RESTfulApiResponse);
+	}
+
 };
 
 const verifyPatchSchema = z.object({

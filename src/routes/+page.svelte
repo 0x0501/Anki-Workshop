@@ -10,6 +10,8 @@
 
 	let deckData = $state(data.deck_data);
 
+	let searchKeywords = $state('');
+
 	let deckTags = $derived.by(() => {
 		let rawTags = deckData.map((item) => {
 			return (JSON.parse(item.deck_tags ?? '') as Array<string>).join(' ');
@@ -30,27 +32,36 @@
 	<div class="flex items-center justify-center py-4 md:py-8 flex-wrap gap-3 mx-auto">
 		<!-- filter buttons -->
 		<div class="flex flex-row flex-wrap justify-center gap-3">
-			<Button pill size="md" value="" onclick={categoryChanged} class="text-xs py-2 md:text-sm"
-				>全部</Button
+			<Button
+				pill
+				color={tagChosen === '' ? 'primary' : 'alternative'}
+				size="md"
+				value=""
+				onclick={categoryChanged}
+				class="text-xs py-2 md:text-sm">全部</Button
 			>
 			{#each deckTags as item}
 				<Button
 					pill
 					size="md"
-					color="alternative"
+					color={tagChosen === item ? 'primary' : 'alternative'}
 					value={item}
 					onclick={categoryChanged}
 					class="text-xs py-2 md:text-sm">{item}</Button
 				>
 			{/each}
 		</div>
-		<form class="flex gap-3">
-			<Search size="md" class="items-center min-w-xs " />
-			<Button class="hidden sm:block p-2.5! me-1 sm:w-25">搜索</Button>
-		</form>
+		<div class="flex gap-3">
+			<Search size="md" class="items-center min-w-xs " bind:value={searchKeywords} />
+		</div>
 	</div>
 	<div class="pl-4 pr-4">
-		<DeckGallery class="grid gap-4 grid-cols-2 md:grid-cols-4" items={deckData} tag={tagChosen} />
+		<DeckGallery
+			class="grid gap-4 grid-cols-2 sm:grid-cols-4 xl:grid-cols-6"
+			items={deckData}
+			tag={tagChosen}
+			{searchKeywords}
+		/>
 	</div>
 	<!-- footer -->
 	<Footer class="text-center mt-3 px-3 py-4 border-t-1 border-gray-300">
