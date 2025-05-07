@@ -28,7 +28,7 @@
 </script>
 
 <div>
-	<HomeNavigation />
+	<HomeNavigation system_settings={data.system_settings}/>
 	<div class="flex items-center justify-center py-4 md:py-8 flex-wrap gap-3 mx-auto">
 		<!-- filter buttons -->
 		<div class="flex flex-row flex-wrap justify-center gap-3">

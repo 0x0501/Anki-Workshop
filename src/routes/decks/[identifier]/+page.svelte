@@ -47,8 +47,8 @@
 	};
 
 	const handleDeckPurchase = () => {
-		window.location.href = currentSelectedDeckData.deck_purchase_link
-	}
+		window.location.href = currentSelectedDeckData.deck_purchase_link;
+	};
 
 	// update navbar
 
@@ -86,7 +86,11 @@
 			{#if currentSelectedDeckData.deck_author_image === null || currentSelectedDeckData.deck_author_image === '' || currentSelectedDeckData.deck_author_image === undefined}
 				<Avatar class="size-12" />
 			{:else}
-				<img class="size-10 sm:size-12 rounded-full bg-gray-300" alt="牌组作者头像" />
+				<img
+					class="size-10 sm:size-12 rounded-full"
+					alt="牌组作者头像"
+					src={data.session?.user.image}
+				/>
 			{/if}
 
 			<div class="inline-flex flex-col justify-center grow">
@@ -180,12 +184,20 @@
 	</div>
 </div>
 
-<Modal bind:open={isPurchaseModelDisplay} size="xs" autoclose placement="center" dialogClass="fixed top-0 start-0 end-0 h-modal md:inset-0 h-full z-50 w-full p-4 flex">
+<Modal
+	bind:open={isPurchaseModelDisplay}
+	size="xs"
+	autoclose
+	placement="center"
+	dialogClass="fixed top-0 start-0 end-0 h-modal md:inset-0 h-full z-50 w-full p-4 flex"
+>
 	<div class="text-center">
-	  <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
-	  <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">即将跳转到闲鱼APP进行购买</h3>
-	  <P class="py-2">点击下面的【确定】按钮会跳转到闲鱼商品链接，拍下商品后会自动发货。</P>
-	  <Button color="primary" class="me-2" onclick={handleDeckPurchase}>确定，我想要这个！</Button>
-	  <Button color="alternative">再考虑考虑</Button>
+		<ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
+		<h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+			即将跳转到闲鱼APP进行购买
+		</h3>
+		<P class="py-2">点击下面的【确定】按钮会跳转到闲鱼商品链接，拍下商品后会自动发货。</P>
+		<Button color="primary" class="me-2" onclick={handleDeckPurchase}>确定，我想要这个！</Button>
+		<Button color="alternative">再考虑考虑</Button>
 	</div>
-  </Modal>
+</Modal>

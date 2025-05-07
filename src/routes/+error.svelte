@@ -5,9 +5,12 @@
 	import HomeNavigation from '$lib/components/HomeNavigation.svelte';
 
 	import { A, Heading, P } from 'flowbite-svelte';
+
+	const { data } = $props();
+
 </script>
 
-<HomeNavigation />
+<HomeNavigation system_settings={data.system_settings}/>
 
 <svelte:head>
 	<title>Anki workshop | 出错啦</title>

@@ -269,7 +269,6 @@
 
 	const handleChange = async (event: Event) => {
 		const target = event.target as HTMLInputElement;
-		console.log('call');
 
 		console.warn(deckSnapshots)
 		if (target.files && target.files.length > 0) {

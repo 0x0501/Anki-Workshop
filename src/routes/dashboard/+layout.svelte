@@ -8,9 +8,7 @@
 		SidebarWrapper,
 		SidebarGroup,
 		SidebarItem,
-
 		A
-
 	} from 'flowbite-svelte';
 
 	import { library } from '@fortawesome/fontawesome-svg-core';
@@ -19,6 +17,7 @@
 	import { ChartPieSolid, ObjectsColumnSolid } from 'flowbite-svelte-icons';
 	import { page } from '$app/state';
 	import { signOut } from '@auth/sveltekit/client';
+	import { goto } from '$app/navigation';
 
 	library.add(faArrowRightFromBracket, faGear, faBell);
 
@@ -32,13 +31,15 @@
 	class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 flex items-center gap-3 justify-between px-4 md:pr-8 py-3 divide-gray-200 dark:divide-gray-700 border-gray-200 dark:border-gray-700 border-b"
 >
 	<!-- back to decks -->
-	<P weight="bold" class="text-gray-600"><A href="/" class="no-underline hover:no-underline text-gray-600">Anki workshop</A></P>
+	<P weight="bold" class="text-gray-600"
+		><A href="/" class="no-underline hover:no-underline text-gray-600">Anki workshop</A></P
+	>
 	<div class="inline-flex gap-3 items-center">
 		<!-- <button class="inline-flex flex-col items-center text-xs">
 			<FontAwesomeIcon icon={faBell} class="text-gray-600" size="lg" />
 		</button> -->
 		<div class="inline-flex cursor-pointer items-center gap-3" id="userAvatar">
-			<Avatar size="sm" />
+			<img alt="User avatar" class="size-10 rounded-full" src={page.data.session?.user.image}/>
 			<!-- user's nickname -->
 			<span class="block text-sm text-gray-900 dark:text-white"
 				>{page.data.session?.user?.name}</span
@@ -46,7 +47,10 @@
 		</div>
 
 		<Dropdown triggeredBy="#userAvatar">
-			<DropdownItem class="inline-flex gap-2 items-center justify-between">
+			<DropdownItem
+				class="inline-flex gap-2 items-center justify-between"
+				onclick={async () => await goto('/dashboard/personal')}
+			>
 				<FontAwesomeIcon icon={faGear} />
 				账号设置
 			</DropdownItem>

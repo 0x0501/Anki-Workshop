@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import type { SvelteHTMLElements } from 'svelte/elements';
+	import type { number } from 'zod';
 
 	let img = $state<HTMLImageElement | null>(null);
 
@@ -20,7 +21,7 @@
 				try {
 					// @ts-ignore
 					cropper = new window.Cropper(img, {
-						aspectRatio: 9 / 16,
+						aspectRatio: props.aspectRatio ? props.aspectRatio : 9 / 16,
 						viewMode: 1,
 
 						// @ts-ignore
@@ -54,7 +55,9 @@
 		};
 	});
 
-	export interface ImageCropProps extends Partial<SvelteHTMLElements['img']> {}
+	export interface ImageCropProps extends Partial<SvelteHTMLElements['img']> {
+		aspectRatio?: number;
+	}
 
 	let props: ImageCropProps = $props();
 

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import HomeNavigation from '$lib/components/HomeNavigation.svelte';
 
-	let { children } = $props();
+	let { children, data } = $props();
 </script>
 
-<HomeNavigation />
+<HomeNavigation system_settings={data.system_settings} />
 
 {@render children()}

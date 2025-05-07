@@ -4,8 +4,13 @@
 	import { signOut } from '@auth/sveltekit/client';
 	import { Button, Navbar, NavBrand, NavHamburger, NavLi, NavUl } from 'flowbite-svelte';
 	import { CogOutline } from 'flowbite-svelte-icons';
+	import type { PageProps } from '../../routes/$types';
 
 	let activeUrl = $derived(page.url.pathname);
+
+	let { system_settings } = $props();
+
+	console.warn(system_settings)
 
 	let session = page.data.session;
 </script>
@@ -14,7 +19,7 @@
 	<Navbar navContainerClass="w-full m-0" class="fixed w-full z-20 top-0 start-0 border-b">
 		<!-- Anki workshop logo -->
 		<NavBrand href="/">
-			<img src="/favicon.png" class="me-3 h-6 sm:h-9" alt="Anki workshop logo" />
+			<img src="/favicon.ico" class="me-3 h-6 sm:h-9" alt="Anki workshop logo" />
 			<span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
 				>Anki Workshop</span
 			>
@@ -44,11 +49,12 @@
 					{:else}
 						<Button color="alternative" size="sm" onclick={() => signOut()}>退出登录</Button>
 					{/if}
-				{:else}
+				{:else if system_settings.allow_user_register}
 					<a
 						class="text-center font-medium focus-within:ring-4 focus-within:outline-hidden items-center justify-center px-4 py-2 text-sm text-white bg-primary-700 hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700 focus-within:ring-primary-300 dark:focus-within:ring-primary-800 rounded-lg"
 						href="/register">注册</a
 					>
+				{:else}
 					<a
 						class="text-center font-medium focus-within:ring-4 focus-within:outline-hidden items-center justify-center px-4 py-2 text-sm text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 focus-within:ring-gray-200 dark:focus-within:ring-gray-700 rounded-lg inline-flex"
 						color="light"
