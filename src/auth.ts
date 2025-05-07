@@ -74,6 +74,7 @@ export function createAuthJsConfig(DB: D1Database): SvelteKitAuthConfig {
 				}
 			})
 		],
+		trustHost: true,
 		session: {
 			// strategy: 'database', // Use database sessions (recommended with adapter)
 			strategy: 'jwt', // Or use JWT if preferred

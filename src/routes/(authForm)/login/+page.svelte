@@ -52,7 +52,6 @@
 	// Redirect if already logged in
 	onMount(() => {
 		if (page.data.session) {
-			console.log(page.data.session);
 			goto('/'); // Or dashboard
 		}
 	});
@@ -116,7 +115,8 @@
 		}
 	}
 
-	// let props: AuthFormProps = $props();
+	let { data } = $props();
+
 </script>
 
 <div class="flex justify-center">
@@ -193,11 +193,7 @@
 					oninput={validatePasswordLoginCriteria}
 					maxlength={18}
 				>
-					<button
-						slot="right"
-						class="pointer-events-auto"
-						onclick={() => (isShowPassword = !isShowPassword)}
-					>
+					<button slot="right" onclick={() => (isShowPassword = !isShowPassword)}>
 						{#if isShowPassword}
 							<EyeOutline class="w-6 h-6" />
 						{:else}
@@ -209,7 +205,7 @@
 					<Helper color="red">{passwordValidationErrorMessage}</Helper>
 				{/if}
 			</div>
-			<Checkbox bind:checked={rememberLoginStatus}>7天免登录</Checkbox>
+			<!-- <Checkbox bind:checked={rememberLoginStatus}>7天免登录</Checkbox> -->
 			{#if formError !== ''}
 				<Helper color="red">{formError}</Helper>
 			{/if}
@@ -220,10 +216,12 @@
 					usernameValidationErrorMessage !== '' ||
 					isSubmitting}>登录</Button
 			>
-			<div class="text-sm flex justify-between">
-				<A href="/register">立即注册</A>
-				<A href="/resetAccount">找回密码</A>
-			</div>
+			{#if data.system_settings.allow_user_register}
+				<div class="text-sm flex justify-between">
+					<A href="/register">立即注册</A>
+					<A href="/resetAccount">找回密码</A>
+				</div>
+			{/if}
 		</div>
 	</form>
 </div>

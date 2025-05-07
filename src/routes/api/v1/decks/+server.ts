@@ -183,9 +183,6 @@ export const PATCH: RequestHandler = async ({ locals, request }) => {
 		} as RESTfulApiResponse);
 	}
 
-	console.log('============');
-	console.log(result.data);
-
 	const updatedDeck = await locals.db
 		.update(decks)
 		.set({ is_deck_on_sale: result.data.is_deck_on_sale })

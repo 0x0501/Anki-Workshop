@@ -4,13 +4,11 @@
 	import { signOut } from '@auth/sveltekit/client';
 	import { Button, Navbar, NavBrand, NavHamburger, NavLi, NavUl } from 'flowbite-svelte';
 	import { CogOutline } from 'flowbite-svelte-icons';
-	import type { PageProps } from '../../routes/$types';
 
 	let activeUrl = $derived(page.url.pathname);
 
 	let { system_settings } = $props();
 
-	console.warn(system_settings);
 
 	let session = page.data.session;
 </script>

@@ -1,7 +1,6 @@
 import type { LayoutServerLoad } from './$types';
 import { decks, users, workshop_settings } from '$lib/database/schema';
 import { eq, type InferSelectModel } from 'drizzle-orm';
-import { error } from '@sveltejs/kit';
 
 type WorkshopSettings = InferSelectModel<typeof workshop_settings>;
 type FullDeckData = InferSelectModel<typeof decks> & {
@@ -15,6 +14,8 @@ export type DeckData = Omit<
 	| 'deck_author_id'
 	| 'deck_front_preview_code'
 	| 'deck_back_preview_code'
+	| 'deck_compress_password'
+	| 'deck_download_link'
 >;
 
 export const load: LayoutServerLoad = async ({
@@ -26,8 +27,6 @@ export const load: LayoutServerLoad = async ({
 }> => {
 	// Auth.js session
 	const session = await locals.auth();
-
-	console.log('+layout.server.ts运行');
 
 	const settings = await locals.db.query.workshop_settings.findFirst({
 		where: eq(workshop_settings.id, 2)
@@ -51,9 +50,9 @@ export const load: LayoutServerLoad = async ({
 			deck_size: decks.deck_size,
 			deck_card_count: decks.deck_card_count,
 			deck_price: decks.deck_price,
-			deck_download_link: decks.deck_download_link,
+			// deck_download_link: decks.deck_download_link,
 			deck_purchase_link: decks.deck_purchase_link,
-			deck_compress_password: decks.deck_compress_password,
+			// deck_compress_password: decks.deck_compress_password,
 			deck_liked_by_people: decks.deck_liked_by_people,
 			deck_cover_image_url: decks.deck_cover_image_url,
 			support_platform: decks.support_platform,

@@ -12,9 +12,6 @@
 	let enableDeckFavoriteFunc = $state(data.system_settings.enable_deck_favorite_func);
 	let enableOnlineStudyFunc = $state(data.system_settings.enable_online_study_func)
 
-	console.log('worksettings:')
-	console.log(data)
-
 	// Function to handle toggle change and submit the form
 	const handleToggleChange = (event: Event) => {
 		const form = (event.target as HTMLInputElement).closest('form');

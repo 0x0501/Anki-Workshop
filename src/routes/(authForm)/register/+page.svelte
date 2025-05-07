@@ -77,7 +77,6 @@
 	// Redirect if already logged in
 	onMount(() => {
 		if (page.data.session) {
-			console.log(page.data.session);
 			goto('/'); // Or dashboard
 		}
 	});
@@ -139,7 +138,6 @@
 
 	const handleFormSubmit = (event: Event) => {
 		event.preventDefault();
-		console.log(userAgreementAndTerm);
 	};
 
 	// let props: AuthFormProps = $props();

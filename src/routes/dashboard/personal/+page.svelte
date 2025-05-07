@@ -30,8 +30,6 @@
 	$effect(() => {
 		username = data.user.name ?? '';
 		userEmail = data.user.email ?? '';
-
-		console.log(userAvatar);
 	});
 
 	let oldPassword = $state('');
@@ -92,12 +90,9 @@
 		if (input.files && input.files.length > 0) {
 			const imageData = await processFile(input.files[0]);
 			userAvatar = imageData;
-			console.warn(userAvatar);
 			openCropModal();
 		}
 	};
-
-	console.log(data);
 </script>
 
 <div class="flex flex-col">
@@ -108,8 +103,6 @@
 		action="?/updateUserInfo"
 		use:enhance={async ({ formData, cancel, action }) => {
 			// 1. upload user image to R2
-
-            console.warn(userAvatar)
 
 			if (userAvatar !== null && userAvatar !== undefined) {
 				try {
@@ -123,16 +116,16 @@
 
 					console.log(userAvatar.blob);
 
-					const uploadResult: RESTfulApiResponse = await uploadResponse.json();
+					const uploadResult = await uploadResponse.text();
 
-					if (uploadResponse.ok && !uploadResult.error) {
-						userAvatar.dataUrl = uploadResult.data as string;
-						console.log('Image uploaded successfully:', uploadResult.data);
-					} else {
-						console.error('Failed to upload image:', uploadResult);
-						// TODO: Handle upload error - maybe show a user notification
-						return; // Stop the process if image upload fails
-					}
+					// if (uploadResponse.ok && !uploadResult.error) {
+					// 	userAvatar.dataUrl = uploadResult.data as string;
+					// 	console.log('Image uploaded successfully:', uploadResult.data);
+					// } else {
+					// 	console.error('Failed to upload image:', uploadResult);
+					// 	// TODO: Handle upload error - maybe show a user notification
+					// 	return; // Stop the process if image upload fails
+					// }
 				} catch (error) {
 					console.error('Error during image upload:', error);
 					// TODO: Handle network error during upload
@@ -161,17 +154,18 @@
 
 				const updateResponse = await fetch(action, { method: 'POST', body: updateFormData });
 
-				const updateResult: RESTfulApiResponse = await updateResponse.json();
+				const updateResult = await updateResponse.json();
 
-				if (updateResponse.ok && !updateResult.error) {
-					console.log('Image uploaded successfully:', updateResult.data);
+				if (updateResponse.ok && updateResult.status === 200) {
+					console.log('Image uploaded successfully:', updateResult);
+					await goto('/dashboard')
 				} else {
 					console.error('Failed to upload image:', updateResult);
+					formErrorMessage = JSON.parse(updateResult.data)[1]
 					// TODO: Handle upload error - maybe show a user notification
 					return; // Stop the process if image upload fails
 				}
 			} catch (error) {
-				console.error(error);
 				formErrorMessage = String(error);
 			}
 

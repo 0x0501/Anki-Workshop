@@ -8,8 +8,6 @@
 
 	let { data } = $props();
 
-	console.warn(data);
-
 	let currentEditDeckId = Number(page.url.pathname.slice(page.url.pathname.lastIndexOf('/') + 1));
 
 	let currentEditDeck = (data.data as FullDeckData[]).filter(

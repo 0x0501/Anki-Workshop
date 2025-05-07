@@ -1,9 +1,10 @@
 import { RESTfulApiErrorCode, type RESTfulApiResponse } from '$lib/api';
 import { users } from '$lib/database/schema';
-import { json, type Actions } from '@sveltejs/kit';
+import { json, fail, type Actions } from '@sveltejs/kit';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { eq } from 'drizzle-orm';
+
 
 const verifyUpdateUserInfoSchema = z.object({
 	id: z.string().nonempty('User ID不能为空'),
@@ -23,14 +24,9 @@ export const actions: Actions = {
 		let updatedUser;
 
 		if (!result.success) {
-			return {
-				status: 'error',
-				data: null,
-				error: {
-					code: RESTfulApiErrorCode.IllegalInput,
-					message: '数据解析错误'
-				}
-			} as RESTfulApiResponse;
+			return fail(400, {
+				message : '请求参数错误'
+			})
 		}
 
 		if (result.data.new_password && result.data.old_password) {
@@ -49,14 +45,9 @@ export const actions: Actions = {
 			);
 
 			if (!passValidResult) {
-				return {
-					status: 'error',
-					data: null,
-					error: {
-						code: RESTfulApiErrorCode.IllegalInput,
-						message: '新旧密码不匹配'
-					}
-				} as RESTfulApiResponse;
+				return fail(400, {
+					message : '新旧密码不匹配'
+				})
 			}
 
 			if (result.data.avatar) {
@@ -111,7 +102,5 @@ export const actions: Actions = {
 				error: null
 			} as RESTfulApiResponse;
 		}
-		console.log('result');
-		console.log(result);
 	}
 };

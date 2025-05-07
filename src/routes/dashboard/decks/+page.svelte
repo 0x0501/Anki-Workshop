@@ -1,18 +1,14 @@
 <script lang="ts">
 	import type { supportPlatformOption } from '$lib/interfaces/supportPlatformOption';
-	import { formatDateFromTimestamp } from '$lib/utils/helper';
-
+	import { invalidateAll } from '$app/navigation';
+	import { RESTfulApiBase } from '$lib/api';
 	import {
 		A,
 		Badge,
-		Breadcrumb,
-		BreadcrumbItem,
 		Button,
 		Checkbox,
 		Heading,
-		Pagination,
 		Search,
-		TabItem,
 		Table,
 		TableBody,
 		TableBodyCell,
@@ -21,11 +17,6 @@
 		TableHeadCell
 	} from 'flowbite-svelte';
 	import type { PageProps } from './$types';
-	import { page } from '$app/state';
-	import { onMount } from 'svelte';
-	import { RESTfulApiBase } from '$lib/api';
-	import { goto, invalidateAll } from '$app/navigation';
-	import { index } from 'drizzle-orm/singlestore-core';
 	/**
 	 * @description Description of a deck, used for sale on the home page.
 	 */
@@ -83,10 +74,6 @@
 
 	// Get data from +page.server.ts
 	const { data }: PageProps = $props();
-
-	onMount(() => {
-		console.log(data)
-	})
 
 	let deckData = $state(data.data as DeckItem[]);
 

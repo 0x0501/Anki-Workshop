@@ -30,11 +30,7 @@
 
 	// 3. Use $effect to update iframe when data changes
 	$effect(() => {
-		console.warn('ok');
-		console.warn(deckPreviewCode);
 		if (deckPreviewCode) {
-			console.log(deckPreviewCode.deck_front_preview_code);
-			console.log(deckPreviewCode.deck_back_preview_code);
 			updateIframeContent(JSON.parse(deckPreviewCode.deck_front_preview_code));
 		}
 	});

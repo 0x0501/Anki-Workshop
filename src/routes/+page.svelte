@@ -5,9 +5,6 @@
 
 	const { data } = $props();
 
-	console.log('/home');
-	console.log(data);
-
 	let deckData = $state(data.deck_data);
 
 	let searchKeywords = $state('');
