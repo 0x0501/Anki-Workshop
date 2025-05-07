@@ -53,10 +53,10 @@
 
 	interface DeckEditorProps {
 		editorType: 'Create' | 'Edit';
-		deckData?: DeckData;
+		deckData?: DeckEditData;
 	}
 
-	type DeckEditData = {
+	export type DeckEditData = {
 		deck_id?: number;
 		deck_name: string;
 		deck_author_id: string | undefined;
@@ -552,8 +552,8 @@
 		
 			</div> -->
 		</div>
-		<div class="flex flex-col md:flex-row gap-3">
-			<div class="w-full">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+			<div class="grow">
 				<Label for="deckDescription" class="mt-2 mb-2">卡组预览（正面代码）</Label>
 				<CodeMirror
 					bind:value={deckFrontPreviewCode}
@@ -564,7 +564,7 @@
 					<Helper class="mt-1" color="red">{formErrors.deckFrontPreviewCode}</Helper>
 				{/if}
 			</div>
-			<div class="w-full">
+			<div class="grow">
 				<Label for="deckDescription" class="mt-2 mb-2">卡组预览（背面代码）</Label>
 				<CodeMirror
 					bind:value={deckBackPreviewCode}

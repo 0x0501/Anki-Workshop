@@ -17,8 +17,10 @@ export const load: LayoutServerLoad = async ({ locals, fetch }) => {
 				'Content-Type': 'application/json'
 			}
 		});
-		const result = await response.json();
+		const result  = await response.json();
 		console.log(`${RESTfulApiBase}/decks 请求成功`);
+		console.log('RESULT:')
+		console.log(result)
 		// console.log(result);
 
 		// transmit response data to pages

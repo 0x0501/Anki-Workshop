@@ -6,9 +6,16 @@ import { error } from '@sveltejs/kit';
 type WorkshopSettings = InferSelectModel<typeof workshop_settings>;
 type FullDeckData = InferSelectModel<typeof decks> & {
 	deck_author_name: string;
-	deck_author_image : string;
+	deck_author_image: string;
 };
-export type DeckData = Omit<FullDeckData, 'created_date' | 'is_deck_on_sale' | 'deck_author_id'>;
+export type DeckData = Omit<
+	FullDeckData,
+	| 'created_date'
+	| 'is_deck_on_sale'
+	| 'deck_author_id'
+	| 'deck_front_preview_code'
+	| 'deck_back_preview_code'
+>;
 
 export const load: LayoutServerLoad = async ({
 	locals
@@ -50,11 +57,11 @@ export const load: LayoutServerLoad = async ({
 			deck_liked_by_people: decks.deck_liked_by_people,
 			deck_cover_image_url: decks.deck_cover_image_url,
 			support_platform: decks.support_platform,
-			deck_front_preview_code: decks.deck_front_preview_code,
-			deck_back_preview_code: decks.deck_back_preview_code,
+			// deck_front_preview_code: decks.deck_front_preview_code,
+			// deck_back_preview_code: decks.deck_back_preview_code,
 			last_updated_date: decks.last_updated_date,
 			deck_author_name: users.username,
-			deck_author_image : users.image,
+			deck_author_image: users.image
 		})
 		.from(decks)
 		.where(eq(decks.is_deck_on_sale, true))
