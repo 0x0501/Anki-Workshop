@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { deckNavState } from '$lib/deckNavState.svelte';
 	import { formatDateFromTimestamp } from '$lib/utils/helper';
-	import { Avatar, Badge, Button, Heading, Hr, Li, List, Tooltip } from 'flowbite-svelte';
-	import { BadgeCheckSolid, CheckOutline } from 'flowbite-svelte-icons';
+	import { Avatar, Badge, Button, Heading, Hr, Li, List, Modal, P, Tooltip } from 'flowbite-svelte';
+	import { BadgeCheckSolid, CheckOutline, ExclamationCircleOutline } from 'flowbite-svelte-icons';
 
 	const { data } = $props();
 	const settings = data.system_settings;
@@ -35,9 +36,19 @@
 	// whether current user was official account
 	let isOfficialAccount = true;
 
+	let isPurchaseModelDisplay = $state(false);
+
 	const changeFollowStatus = () => {
 		isFollowedAuthor = !isFollowedAuthor;
 	};
+
+	const handleImportDeckToAnki = () => {
+		isPurchaseModelDisplay = true;
+	};
+
+	const handleDeckPurchase = () => {
+		window.location.href = currentSelectedDeckData.deck_purchase_link
+	}
 
 	// update navbar
 
@@ -53,14 +64,18 @@
 	<div class="min-w-xs md:w-sm order-2 md:order-1">
 		<img class="rounded-md" src={currentSelectedDeckData.deck_cover_image_url} alt="牌组预览图" />
 		<div class="flex-col gap-3 mt-3 just hidden md:flex lg:hidden">
-			<Button color="alternative" class="w-auto">一键导入Anki（.apkg）</Button>
+			<Button color="alternative" class="w-auto" onclick={handleImportDeckToAnki}
+				>一键导入Anki（.apkg）</Button
+			>
 			<Button
 				color="alternative"
 				class="w-auto"
 				href={`/decks/preview/${page.url.pathname.slice(page.url.pathname.lastIndexOf('/') + 1)}`}
 				>预览</Button
 			>
-			<Button color="blue" class="w-auto">在线学习</Button>
+			{#if settings.enable_online_study_func}
+				<Button color="blue" class="w-auto">在线学习</Button>
+			{/if}
 		</div>
 	</div>
 
@@ -145,8 +160,10 @@
 			<div
 				class="col-span-full md:col-span-3 lg:col-span-2 2xl:col-span-1 flex-col gap-3 mt-3 md:mt-0 flex md:hidden lg:flex justify-center"
 			>
-				<Button color={settings.enable_online_study_func ? 'alternative' : 'blue'} class="w-auto"
-					>一键导入Anki（.apkg）</Button
+				<Button
+					color={settings.enable_online_study_func ? 'alternative' : 'blue'}
+					class="w-auto"
+					onclick={handleImportDeckToAnki}>一键导入Anki（.apkg）</Button
 				>
 				<Button
 					color="alternative"
@@ -162,3 +179,13 @@
 		</div>
 	</div>
 </div>
+
+<Modal bind:open={isPurchaseModelDisplay} size="xs" autoclose placement="center" dialogClass="fixed top-0 start-0 end-0 h-modal md:inset-0 h-full z-50 w-full p-4 flex">
+	<div class="text-center">
+	  <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
+	  <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">即将跳转到闲鱼APP进行购买</h3>
+	  <P class="py-2">点击下面的【确定】按钮会跳转到闲鱼商品链接，拍下商品后会自动发货。</P>
+	  <Button color="primary" class="me-2" onclick={handleDeckPurchase}>确定，我想要这个！</Button>
+	  <Button color="alternative">再考虑考虑</Button>
+	</div>
+  </Modal>

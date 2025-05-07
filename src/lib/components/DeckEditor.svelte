@@ -48,7 +48,9 @@
 		{ value: '考编', name: '考编' },
 		{ value: '教资', name: '教资' },
 		{ value: '英语', name: '英语' },
-		{ value: '计算机', name: '计算机' }
+		{ value: '计算机', name: '计算机' },
+		{ value: '模板', name: '模板' },
+		{ value: '思维导图', name: '思维导图' },
 	];
 
 	interface DeckEditorProps {

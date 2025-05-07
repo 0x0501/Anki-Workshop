@@ -217,7 +217,7 @@
 	<Heading tag="h4" class="mb-2">所有卡组</Heading>
 
 	<div class="flex flex-col gap-3 md:gap-1 md:flex-row mb-3 pr-3 justify-between py-2 items-center">
-		<form class="inline-flex gap-2 items-center">
+		<form class="inline-flex gap-2 items-center flex-col md:flex-row">
 			<Search
 				size="md"
 				class="w-xs lg:w-sm"
