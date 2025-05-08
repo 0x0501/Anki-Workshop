@@ -47,7 +47,8 @@
 	};
 
 	const handleDeckPurchase = () => {
-		window.location.href = currentSelectedDeckData.deck_purchase_link;
+		// window.location.href = currentSelectedDeckData.deck_purchase_link;
+		window.open(currentSelectedDeckData.deck_purchase_link, '_blank');
 	};
 
 	// update navbar
