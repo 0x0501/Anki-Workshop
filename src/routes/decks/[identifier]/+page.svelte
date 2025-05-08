@@ -99,7 +99,7 @@
 					{currentSelectedDeckData.deck_author_name}
 					{#if isOfficialAccount}
 						<BadgeCheckSolid color="#1677ff" class="size-4 md:size-5" />
-						<Tooltip class="text-xs sm:text-sm">官方账号</Tooltip>
+						<Tooltip class="text-xs sm:text-sm z-50">官方账号</Tooltip>
 					{/if}
 				</div>
 				<!-- author bio -->
