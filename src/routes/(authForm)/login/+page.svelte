@@ -224,3 +224,7 @@
 		</div>
 	</form>
 </div>
+
+<svelte:head>
+	<title>Anki Workshop | 登录</title>
+</svelte:head>

@@ -25,6 +25,11 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Anki Workshop | 发现和分享高质量Anki卡组与模板</title>
+	<meta name="description" content="在 Anki Workshop 探索海量用户分享的 Anki 卡组与专业设计的模板。提升学习效率，轻松记忆，支持多种学科和语言。" />
+</svelte:head>
+
 <div>
 	<HomeNavigation system_settings={data.system_settings}/>
 	<div class="flex items-center justify-center py-4 md:py-8 flex-wrap gap-3 mx-auto">

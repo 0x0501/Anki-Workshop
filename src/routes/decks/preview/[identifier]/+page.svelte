@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { Button, Hr } from 'flowbite-svelte';
 
 	const { data } = $props();
@@ -74,3 +75,8 @@
 		</div>
 	</div>
 </div>
+
+
+<svelte:head>
+	<title>Anki Workshop | 卡组预览</title>
+</svelte:head>

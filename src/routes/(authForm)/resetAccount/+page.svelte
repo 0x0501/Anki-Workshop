@@ -82,3 +82,8 @@
 		</div>
 	</form>
 </div>
+
+
+<svelte:head>
+	<title>Anki Workshop | 找回密码</title>
+</svelte:head>

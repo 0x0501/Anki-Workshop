@@ -27,3 +27,8 @@
         注意：Anki Workshop 是独立运营的第三方平台，所提供的内容与服务并非由 Anki 官方开发或运营，我们与其无任何隶属关系或商业利益关联。Anki 是 Anki Inc. 的注册商标。
     </Footer>
 </div>
+
+<svelte:head>
+	<title>Anki Workshop | 关于本站</title>
+	<meta name="description" content="了解 Anki Workshop 的使命：为更聪明的学习，打造更智慧的记忆卡片。我们是独立的第三方平台，致力于提供优质 Anki 学习资源。" />
+</svelte:head>

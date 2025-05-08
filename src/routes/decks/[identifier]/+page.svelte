@@ -201,3 +201,15 @@
 		<Button color="alternative">再考虑考虑</Button>
 	</div>
 </Modal>
+
+<svelte:head>
+    <title>{data.deck_data[0].deck_name} | Anki卡组 | Anki Workshop</title>
+    <meta name="description" content="下载和学习由 {data.deck_data[0].deck_author_name || '用户'} 分享的 Anki 卡组 '{data.deck_data[0].deck_name}'。{data.deck_data[0].deck_description || '包含丰富的学习卡片，助您高效记忆。'}" />
+    <meta property="og:title" content="{data.deck_data[0].deck_name} | Anki卡组 | Anki Workshop" />
+    <meta property="og:description" content="下载和学习由 {data.deck_data[0].deck_author_name || '用户'} 分享的 Anki 卡组 【{data.deck_data[0].deck_name}】。{data.deck_data[0].deck_description || '包含丰富的学习卡片，助您高效记忆。'}" />
+    {#if data.deck_data[0].deck_cover_image_url}
+        <meta property="og:image" content="https://anki-workshop.sumku.cc/logo.png" />
+        <meta name="twitter:image" content="https://anki-workshop.sumku.cc/logo.png" />
+    {/if}
+    <meta property="og:url" content="https://anki-workshop.sumku.cc/decks/{data.deck_data[0].id}" />
+</svelte:head>
