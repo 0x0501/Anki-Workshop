@@ -25,8 +25,12 @@
 	import { z } from 'zod';
 	import CodeMirror from 'svelte-codemirror-editor';
 	import { html } from '@codemirror/lang-html';
+	import { basicSetup } from 'codemirror'; // Import basicSetup
 	import type { StringifyOptions } from 'querystring';
 	import { convertImageToWebP } from '$lib/utils/helper';
+
+	// Define the extensions for CodeMirror
+	let editorExtensions = [basicSetup, html()];
 
 	// Store as JSON.stringify()
 	let deckFrontPreviewCode = $state<string>();
@@ -566,7 +570,7 @@
 				<Label for="deckDescription" class="mt-2 mb-2">卡组预览（正面代码）</Label>
 				<CodeMirror
 					bind:value={deckFrontPreviewCode}
-					lang={html()}
+					extensions={editorExtensions}
 					placeholder="卡片的正面代码（HTML, Javascript, CSS）"
 				/>
 				{#if formErrors.deckFrontPreviewCode}
@@ -577,7 +581,7 @@
 				<Label for="deckDescription" class="mt-2 mb-2">卡组预览（背面代码）</Label>
 				<CodeMirror
 					bind:value={deckBackPreviewCode}
-					lang={html()}
+					extensions={editorExtensions}
 					placeholder="卡片的背面代码（HTML, Javascript, CSS）"
 				/>
 				{#if formErrors.deckBackPreviewCode}
