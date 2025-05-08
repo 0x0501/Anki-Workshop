@@ -1,6 +1,5 @@
 import { RESTfulApiErrorCode, type RESTfulApiResponse } from '$lib/api';
 import { json } from '@sveltejs/kit';
-import sharp from 'sharp';
 import { z } from 'zod';
 
 const verifyPostSchema = z.object({
@@ -25,9 +24,7 @@ export const POST = async ({ request, platform }) => {
 
 		const arrayBuffer = await result.data.avatarImageBlob.arrayBuffer();
 
-		const sharpBuffer = await sharp(arrayBuffer).webp({ quality: 80 }).toBuffer();
-
-		const webpBlob = new Blob([sharpBuffer], { type: 'image/webp' });
+		const webpBlob = new Blob([arrayBuffer], { type: 'image/webp' });
 
 		if (!platform?.env.anki_workshop_images) {
 			return json({

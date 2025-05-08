@@ -74,6 +74,7 @@ export function createAuthJsConfig(DB: D1Database): SvelteKitAuthConfig {
 				}
 			})
 		],
+		useSecureCookies: true,
 		trustHost: true,
 		session: {
 			// strategy: 'database', // Use database sessions (recommended with adapter)

@@ -32,7 +32,7 @@
 			<!-- <NavLi class="text-sm md:text-base" href="/common-faq">常见问题</NavLi> -->
 			<!-- <NavLi class="text-sm md:text-base" href="/contact">联系</NavLi> -->
 			<NavLi class="text-sm md:text-base" href="/about">关于本站</NavLi>
-			<div class="flex gap-3 flex-col md:flex-row items-center">
+			<li class="flex gap-3 flex-col md:flex-row items-center">
 				{#if session}
 					<span>{session.user?.name}</span>
 					{#if session.user.role === UserRole.Root}
@@ -58,7 +58,7 @@
 						href="/login">登录</a
 					>
 				{/if}
-			</div>
+			</li>
 		</NavUl>
 	</Navbar>
 </div>

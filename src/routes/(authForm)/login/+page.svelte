@@ -116,7 +116,6 @@
 	}
 
 	let { data } = $props();
-
 </script>
 
 <div class="flex justify-center">
@@ -193,7 +192,7 @@
 					oninput={validatePasswordLoginCriteria}
 					maxlength={18}
 				>
-					<button slot="right" onclick={() => (isShowPassword = !isShowPassword)}>
+					<button slot="right" onclick={() => (isShowPassword = !isShowPassword)} type="button">
 						{#if isShowPassword}
 							<EyeOutline class="w-6 h-6" />
 						{:else}
