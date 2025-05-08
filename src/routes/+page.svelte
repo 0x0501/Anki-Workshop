@@ -2,8 +2,9 @@
 	import DeckGallery from '$lib/components/DeckGallery.svelte';
 	import HomeNavigation from '$lib/components/HomeNavigation.svelte';
 	import { Button, Search, Footer, FooterCopyright } from 'flowbite-svelte';
+	import type { PageData } from './$types';
 
-	const { data } = $props();
+	const { data }: { data: PageData } = $props();
 
 	let deckData = $state(data.deck_data);
 

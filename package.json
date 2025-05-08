@@ -15,6 +15,7 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
+		"@cloudflare/vite-plugin": "^1.1.1",
 		"@cloudflare/workers-types": "^4.20250504.0",
 		"@codemirror/lang-html": "^6.4.9",
 		"@eslint/compat": "^1.2.5",
@@ -59,7 +60,6 @@
 		"bcryptjs": "^3.0.2",
 		"cropperjs": "2.0.0-alpha.2",
 		"dotenv": "^16.5.0",
-		"drizzle-orm": "^0.43.1",
-		"sharp": "^0.34.1"
+		"drizzle-orm": "^0.43.1"
 	}
 }

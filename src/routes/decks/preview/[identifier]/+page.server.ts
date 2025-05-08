@@ -1,6 +1,5 @@
 // Get front and back code from server
 
-import { RESTfulApiBase } from '$lib/api';
 import type { PageServerLoad } from './$types';
 
 export type DeckPreviewCode = {
@@ -13,7 +12,7 @@ export type DeckPreviewCode = {
 export const load: PageServerLoad = async ({ fetch, params }) => {
 	console.log('Fetching deck preview code for identifier:', params.identifier);
 
-	const response = await fetch(`${RESTfulApiBase}/decks/preview?deck_id=${params.identifier}`, {
+	const response = await fetch(`/api/v1/decks/preview?deck_id=${params.identifier}`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json'

@@ -1,7 +1,5 @@
-import 'dotenv';
 import { json } from '@sveltejs/kit';
 import { z } from 'zod';
-import sharp from 'sharp';
 import { RESTfulApiErrorCode, type RESTfulApiResponse } from '$lib/api.js';
 import { v4 as uuidv6 } from 'uuid';
 
@@ -31,10 +29,7 @@ export async function POST({ request, platform }) {
 		}
 
 		const arrayBuffer = await result.data?.deckCoverImageBlob.arrayBuffer();
-
-		const sharpBuffer = await sharp(arrayBuffer).webp({ quality: 80 }).toBuffer();
-
-		const webpBlob = new Blob([sharpBuffer], { type: 'image/webp' });
+		const webpBlob = new Blob([arrayBuffer], { type: 'image/webp' });
 
 		if (!platform?.env.anki_workshop_images) {
 			return json({
@@ -90,5 +85,3 @@ export async function POST({ request, platform }) {
 		return json({ error: 'Failed to upload image.' }, { status: 500 });
 	}
 }
-
-// TODO: Add other necessary imports and helper functions for image processing and R2 upload/local storage.

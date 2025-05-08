@@ -1,5 +1,4 @@
 import { drizzle, type DrizzleD1Database } from "drizzle-orm/d1";
-import 'dotenv/config';
 import * as schema from '../schema'; // Import your schema
 import type { D1Database } from '@cloudflare/workers-types'; // Import D1Database type
 

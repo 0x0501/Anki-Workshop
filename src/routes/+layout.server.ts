@@ -1,22 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import { decks, users, workshop_settings } from '$lib/database/schema';
-import { eq, type InferSelectModel } from 'drizzle-orm';
-
-type WorkshopSettings = InferSelectModel<typeof workshop_settings>;
-type FullDeckData = InferSelectModel<typeof decks> & {
-	deck_author_name: string;
-	deck_author_image: string;
-};
-export type DeckData = Omit<
-	FullDeckData,
-	| 'created_date'
-	| 'is_deck_on_sale'
-	| 'deck_author_id'
-	| 'deck_front_preview_code'
-	| 'deck_back_preview_code'
-	| 'deck_compress_password'
-	| 'deck_download_link'
->;
+import { eq } from 'drizzle-orm';
+import type { DeckData, WorkshopSettings } from '$lib/database/schema/types';
 
 export const load: LayoutServerLoad = async ({
 	locals

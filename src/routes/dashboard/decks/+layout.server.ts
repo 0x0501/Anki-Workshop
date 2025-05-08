@@ -1,6 +1,6 @@
 // get all the decks from API end point
 
-import { checkRole, RESTfulApiBase, type RESTfulApiResponse } from '$lib/api';
+import { checkRole, type RESTfulApiResponse } from '$lib/api';
 import { UserRole } from '$lib/database/schema';
 import type { LayoutServerLoad } from './$types';
 
@@ -11,14 +11,14 @@ export const load: LayoutServerLoad = async ({ locals, fetch }) => {
 		// all the operations under decks/* need root permission
 		checkRole(session, UserRole.Root);
 
-		const response = await fetch(`${RESTfulApiBase}/decks`, {
+		const response = await fetch(`/api/v1/decks`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json'
 			}
 		});
 		const result  = await response.json();
-		console.log(`${RESTfulApiBase}/decks 请求成功`);
+		console.log(`/api/v1/decks 请求成功`);
 		console.log('RESULT:')
 		console.log(result)
 		// console.log(result);
@@ -28,7 +28,7 @@ export const load: LayoutServerLoad = async ({ locals, fetch }) => {
 		return result as RESTfulApiResponse;
 	} catch (e) {
 		const error = e as { status?: number; message?: string };
-		console.log(`${RESTfulApiBase}/decks: 请求失败`);
+		console.log(`/api/v1/decks: 请求失败`);
         console.log(error)
 
 		return {

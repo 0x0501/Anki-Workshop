@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import type { DeckData } from '../../routes/+layout.server';
+	import type { DeckData } from '$lib/interfaces/deckData'
 
 	export interface DeckGalleryProps {
 		class?: string;

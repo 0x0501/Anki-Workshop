@@ -16,6 +16,7 @@
 		type SelectOptionType
 	} from 'flowbite-svelte';
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
+	import convertImageToWebp from '$lib/components/ImageCropper.svelte';
 	import { RESTfulApiBase, type RESTfulApiResponse } from '$lib/api';
 	import { page } from '$app/state';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -25,7 +26,7 @@
 	import CodeMirror from 'svelte-codemirror-editor';
 	import { html } from '@codemirror/lang-html';
 	import type { StringifyOptions } from 'querystring';
-	import type { DeckData } from '../../routes/+layout.server';
+	import { convertImageToWebP } from '$lib/utils/helper';
 
 	// Store as JSON.stringify()
 	let deckFrontPreviewCode = $state<string>();
@@ -50,7 +51,7 @@
 		{ value: '英语', name: '英语' },
 		{ value: '计算机', name: '计算机' },
 		{ value: '模板', name: '模板' },
-		{ value: '思维导图', name: '思维导图' },
+		{ value: '思维导图', name: '思维导图' }
 	];
 
 	interface DeckEditorProps {
@@ -270,7 +271,7 @@
 	const handleChange = async (event: Event) => {
 		const target = event.target as HTMLInputElement;
 
-		console.warn(deckSnapshots)
+		console.warn(deckSnapshots);
 		if (target.files && target.files.length > 0) {
 			if (deckSnapshots.length >= 5) {
 				console.warn('Maximum 5 images allowed.');
@@ -369,7 +370,14 @@
 			if ((deckCoverImageBlob as Blob).size > 0) {
 				try {
 					const formData = new FormData();
-					formData.append('deckCoverImageBlob', deckCoverImageBlob as Blob, 'deckCoverImageBlob');
+
+					/**
+					 * 1.1 Convert image to .webp format using Web API
+					 */
+					const webpCoverBlob =
+						(await convertImageToWebP(deckCoverImageBlob as Blob)) ?? (deckCoverImageBlob as Blob);
+
+					formData.append('deckCoverImageBlob', webpCoverBlob, 'deckCoverImageBlob');
 					const uploadResponse = await fetch('/api/v1/decks/upload-image', {
 						method: 'POST',
 						body: formData
@@ -438,7 +446,7 @@
 					// show a notification
 					setTimeout(async () => {
 						await invalidateAll();
-						await goto('/dashboard/decks')
+						await goto('/dashboard/decks');
 					}, 500);
 				} else {
 					console.error('Failed to create deck:', result);

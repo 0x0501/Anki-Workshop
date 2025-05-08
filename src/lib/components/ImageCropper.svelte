@@ -2,7 +2,6 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import type { SvelteHTMLElements } from 'svelte/elements';
-	import type { number } from 'zod';
 
 	let img = $state<HTMLImageElement | null>(null);
 

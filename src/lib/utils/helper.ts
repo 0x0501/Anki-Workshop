@@ -10,3 +10,28 @@ export function formatDateFromTimestamp(timestamp: number, isMilliseconds = fals
 
 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+
+export async function convertImageToWebP(blob: Blob): Promise<Blob | null> {
+	try {
+		const img = new Image();
+		img.src = URL.createObjectURL(blob);
+		await img.decode(); // wait until the image was decoded
+
+		const canvas = document.createElement('canvas');
+		canvas.width = img.width;
+		canvas.height = img.height;
+		const ctx = canvas.getContext('2d');
+
+		if (!ctx) {
+			throw new Error('Failed to get canvas context');
+		}
+		ctx.drawImage(img, 0, 0);
+
+		return new Promise((resolve) => {
+			canvas.toBlob((blob) => resolve(blob), 'image/webp', 0.6);
+		});
+	} catch (error) {
+		console.error('Error converting image to WebP:', error);
+		return null;
+	}
+}

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import type { RESTfulApiResponse } from '$lib/api.js';
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
+	import { convertImageToWebP } from '$lib/utils/helper.js';
 	import {
 		Avatar,
 		Button,
@@ -106,26 +106,26 @@
 
 			if (userAvatar !== null && userAvatar !== undefined) {
 				try {
+					const webpAvatarBlob = await convertImageToWebP(userAvatar.blob as Blob) ?? userAvatar.blob;
+
 					const avatarFormData = new FormData();
-					avatarFormData.append('avatarImageBlob', userAvatar.blob, 'avatarImageBlob');
+					avatarFormData.append('avatarImageBlob', webpAvatarBlob, 'avatarImageBlob');
 
 					const uploadResponse = await fetch('/api/v1/user/image', {
 						method: 'POST',
 						body: avatarFormData
 					});
 
-					console.log(userAvatar.blob);
+					const uploadResult = await uploadResponse.json();
 
-					const uploadResult = await uploadResponse.text();
-
-					// if (uploadResponse.ok && !uploadResult.error) {
-					// 	userAvatar.dataUrl = uploadResult.data as string;
-					// 	console.log('Image uploaded successfully:', uploadResult.data);
-					// } else {
-					// 	console.error('Failed to upload image:', uploadResult);
-					// 	// TODO: Handle upload error - maybe show a user notification
-					// 	return; // Stop the process if image upload fails
-					// }
+					if (uploadResponse.ok && uploadResult.status) {
+						userAvatar.dataUrl = uploadResult.data as string;
+						console.log('Image uploaded successfully:', uploadResult.data);
+					} else {
+						console.error('Failed to upload image:', uploadResult);
+						// TODO: Handle upload error - maybe show a user notification
+						return; // Stop the process if image upload fails
+					}
 				} catch (error) {
 					console.error('Error during image upload:', error);
 					// TODO: Handle network error during upload
@@ -158,10 +158,10 @@
 
 				if (updateResponse.ok && updateResult.status === 200) {
 					console.log('Image uploaded successfully:', updateResult);
-					await goto('/dashboard')
+					await goto('/dashboard');
 				} else {
 					console.error('Failed to upload image:', updateResult);
-					formErrorMessage = JSON.parse(updateResult.data)[1]
+					formErrorMessage = JSON.parse(updateResult.data)[1];
 					// TODO: Handle upload error - maybe show a user notification
 					return; // Stop the process if image upload fails
 				}
@@ -183,7 +183,7 @@
 					onchange={handleChange}
 					multiple={false}
 				/>
-				<button onclick={openFilePicker}>
+				<button onclick={openFilePicker} type="button">
 					{#if data.user.image !== null || userAvatar}
 						<img
 							alt="user_avatar"
