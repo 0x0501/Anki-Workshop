@@ -413,7 +413,7 @@
 				deck_price: Number(deckPrice), // Ensure it's a number
 				is_deck_on_sale: true, // Default to true as per original logic
 				support_platform: JSON.stringify(selectedPlatform), // Serialized array
-				deck_cover_image_url: props.editorType === 'Edit' ? deckCoverImageUrl : deckFileDownloadURL, // Use the URL from R2 or original if not uploaded
+				deck_cover_image_url: props.editorType === 'Edit' ? deckCoverImageUrl : finalCoverImageUrl, // Use the URL from R2 or original if not uploaded
 				deck_tags: JSON.stringify(selectedTags), // Serialized array
 				deck_download_link: deckFileDownloadURL,
 				deck_compress_password: deckFilePassword,
