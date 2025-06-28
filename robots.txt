@@ -1,0 +1,7 @@
+User-agent: *
+Allow: / # 允许抓取所有内容（可以根据需要调整）
+Disallow: /admin/
+Disallow: /cart/
+Disallow: /account/
+
+Sitemap: https://anki-workshop.sumku.cc/sitemap.xml
